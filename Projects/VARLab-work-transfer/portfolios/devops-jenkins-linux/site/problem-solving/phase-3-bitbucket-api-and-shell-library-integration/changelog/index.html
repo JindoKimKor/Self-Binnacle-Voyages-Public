@@ -1,0 +1,3877 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Jenkins refactoring, CI/CD architecture, technical debt, software smells, design patterns, 4-layer architecture, shared library">
+      
+      
+        <meta name="author" content="Jindo Kim">
+      
+      
+      
+        <link rel="prev" href="../../phase-2-3-level-logger-system-implementation/changelog/">
+      
+      
+        <link rel="next" href="../../phase-4-full-pipeline-refactoring-and-stage-modularization/changelog/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Phase 3 - Bitbucket API and Shell Library Integration - Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#phase-3-bitbucket-api-shell-library-integration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns" class="md-header__button md-logo" aria-label="Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Phase 3 - Bitbucket API and Shell Library Integration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns" class="md-nav__button md-logo" aria-label="Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Problem Analysis
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Problem Analysis
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/problem-analysis-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Problem Analysis Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/detailed-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detailed Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/architecture-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/DRY-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DRY Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Sequence Diagrams
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pipeline Sequence Diagrams
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/pipeline-sequence-diagrams/domain-mapping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain Mapping
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/pipeline-sequence-diagrams/dlx-ci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DLXJenkins CI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/pipeline-sequence-diagrams/dlx-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DLXJenkins CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/pipeline-sequence-diagrams/js-ci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JsJenkins CI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/pipeline-sequence-diagrams/js-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JsJenkins CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/pipeline-sequence-diagrams/jenkins-ci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PipelineForJenkins CI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Per-File Analysis
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Per-File Analysis
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_1" id="__nav_2_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    generalHelper
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    generalHelper
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/01-generalHelper/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/01-generalHelper/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/01-generalHelper/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_2" id="__nav_2_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    jsHelper
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    jsHelper
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/02-jsHelper/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/02-jsHelper/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/02-jsHelper/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_3" id="__nav_2_6_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    unityHelper
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    unityHelper
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/03-unityHelper/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/03-unityHelper/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/03-unityHelper/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_4" id="__nav_2_6_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DLXJenkins-Jenkinsfile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    DLXJenkins-Jenkinsfile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/04-DLXJenkins-Jenkinsfile/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/04-DLXJenkins-Jenkinsfile/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/04-DLXJenkins-Jenkinsfile/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_5" id="__nav_2_6_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DLXJenkins-JenkinsfileDeployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    DLXJenkins-JenkinsfileDeployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/05-DLXJenkins-JenkinsfileDeployment/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/05-DLXJenkins-JenkinsfileDeployment/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/05-DLXJenkins-JenkinsfileDeployment/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_6" id="__nav_2_6_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JsJenkins-Jenkinsfile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    JsJenkins-Jenkinsfile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/06-JsJenkins-Jenkinsfile/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/06-JsJenkins-Jenkinsfile/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/06-JsJenkins-Jenkinsfile/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_7" id="__nav_2_6_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JsJenkins-JenkinsfileDeployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    JsJenkins-JenkinsfileDeployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/07-JsJenkins-JenkinsfileDeployment/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/07-JsJenkins-JenkinsfileDeployment/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/07-JsJenkins-JenkinsfileDeployment/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_8" id="__nav_2_6_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PipelineForJenkins-Jenkinsfile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    PipelineForJenkins-Jenkinsfile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/08-PipelineForJenkins-Jenkinsfile/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/08-PipelineForJenkins-Jenkinsfile/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-analysis/08-PipelineForJenkins-Jenkinsfile/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Problem Solving
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Problem Solving
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../solution-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solution Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../solution-by-layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solution by Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../solution-by-feature/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solution by Feature
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../logger-system-design-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Logger System Design and Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../domain-driven-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain-Driven Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins-cps-serialization-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jenkins CPS Serialization Diagram
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pull-request-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pull Request Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_8" id="__nav_3_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation Phases
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Implementation Phases
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../phase-0-global-trusted-shared-library-setup/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 0 - Global Trusted Shared Library Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../phase-1-shellscript-modularization-and-initialization-stage/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 1 - Shell Script Modularization and Initialization Stage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../phase-2-3-level-logger-system-implementation/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 2 - 3-Level Logger System Implementation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 3 - Bitbucket API and Shell Library Integration
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 3 - Bitbucket API and Shell Library Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#basic-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Information
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Goal
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-commit-list-by-phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Commit List (by Phase)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-phase-by-phase-detailed-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Phase-by-Phase Detailed Analysis
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-new-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. New Files
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-4-layer-architecture-established" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 4-Layer Architecture Established
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-core-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Core Patterns
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-bitbucket-api-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Bitbucket API Integration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Benefits
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../phase-4-full-pipeline-refactoring-and-stage-modularization/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 4 - Full Pipeline Refactoring and Stage Modularization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="phase-3-bitbucket-api-shell-library-integration">Phase 3: Bitbucket API &amp; Shell Library Integration</h1>
+<h2 id="basic-information">Basic Information</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Start</strong></td>
+<td><code>9c245c1</code> (2025-04-27, Phase 2 ended)</td>
+</tr>
+<tr>
+<td><strong>Final</strong></td>
+<td><code>48f4295</code> (2025-05-05)</td>
+</tr>
+<tr>
+<td><strong>Total Commits</strong></td>
+<td>84</td>
+</tr>
+<tr>
+<td><strong>Duration</strong></td>
+<td>2025-05-01 ~ 2025-05-05 (5 days)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#1-goal">Goal</a></li>
+<li><a href="#2-commit-list-by-phase">Commit List (by Phase)</a></li>
+<li><a href="#3-phase-by-phase-detailed-analysis">Phase-by-Phase Detailed Analysis</a></li>
+<li>3.1 <a href="#31-phase-1-jenkins-environment-test-and-bitbucket-api-initial-implementation">Phase 1: Jenkins Environment Test and Bitbucket API Initial Implementation</a></li>
+<li>3.2 <a href="#32-phase-2-bitbucket-api-http-communication-implementation-and-debugging">Phase 2: Bitbucket API HTTP Communication Implementation and Debugging</a></li>
+<li>3.3 <a href="#33-phase-3-shellscript-helper-refactoring">Phase 3: ShellScript Helper Refactoring</a></li>
+<li>3.4 <a href="#34-phase-4-git-shell-scripts-implementation-and-stageprojectprepare">Phase 4: Git Shell Scripts Implementation and stageProjectPrepare</a></li>
+<li>3.5 <a href="#35-phase-5-gitlibraryshellibrary-separation-and-bitbucketapiservice">Phase 5: GitLibrary/ShellLibrary Separation and BitbucketApiService</a></li>
+<li>3.6 <a href="#36-phase-6-shell-library-cleanup-and-completion">Phase 6: Shell Library Cleanup and Completion</a></li>
+<li><a href="#4-new-files">New Files</a></li>
+<li><a href="#5-4-layer-architecture-established">4-Layer Architecture Established</a></li>
+<li><a href="#6-core-patterns">Core Patterns</a></li>
+<li><a href="#7-bitbucket-api-integration">Bitbucket API Integration</a></li>
+<li><a href="#8-benefits">Benefits</a></li>
+<li><a href="#9-next-steps">Next Steps</a></li>
+</ol>
+<hr />
+<h2 id="1-goal">1. Goal</h2>
+<ol>
+<li>Bitbucket Cloud API integration for automatic build status reporting</li>
+<li>Abstract Git/Shell commands into reusable libraries</li>
+<li>Establish src/service/, src/utils/ layer architecture</li>
+</ol>
+<hr />
+<h2 id="2-commit-list-by-phase">2. Commit List (by Phase)</h2>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Content</th>
+<th>Commit Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Jenkins Environment Test and Bitbucket API Initial Implementation (2025-05-01)</td>
+<td>7</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Bitbucket API HTTP Communication Implementation and Debugging (2025-05-02 first half)</td>
+<td>21</td>
+</tr>
+<tr>
+<td>3</td>
+<td>ShellScript Helper Refactoring (2025-05-02 second half)</td>
+<td>8</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Git Shell Scripts Implementation and stageProjectPrepare (2025-05-03)</td>
+<td>26</td>
+</tr>
+<tr>
+<td>5</td>
+<td>GitLibrary/ShellLibrary Separation and BitbucketApiService (2025-05-04)</td>
+<td>16</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Shell Library Cleanup and Completion (2025-05-05)</td>
+<td>6</td>
+</tr>
+</tbody>
+</table>
+<details>
+<summary><strong>Phase 1: Jenkins Environment Test and Bitbucket API Initial Implementation (7 commits)</strong></summary>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Commit</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2025-05-01</td>
+<td><code>dd02d58</code></td>
+<td>Add print jenkins environment</td>
+</tr>
+<tr>
+<td>2025-05-01</td>
+<td><code>ea2d6bc</code></td>
+<td>repo:push test</td>
+</tr>
+<tr>
+<td>2025-05-01</td>
+<td><code>612b8e9</code></td>
+<td>repo:push test</td>
+</tr>
+<tr>
+<td>2025-05-01</td>
+<td><code>4fce553</code></td>
+<td>Replace PR_BRANCH with GIT_BRANCH</td>
+</tr>
+<tr>
+<td>2025-05-01</td>
+<td><code>ab3b6a6</code></td>
+<td>Corrected PR_BRANCH to GIT_BRANCH</td>
+</tr>
+<tr>
+<td>2025-05-01</td>
+<td><code>8b062fc</code></td>
+<td>Delete necessary function to get full commit hash because full commit hash can be grabed as same value in Jenkins Initial Environment named 'GIT_COMMIT: Jenkins Log-763</td>
+</tr>
+<tr>
+<td>2025-05-01</td>
+<td><code>12dcf8d</code></td>
+<td>Implemented sendBuildStatusForCommit method to send build status to Bitbucket Cloud API. - Implemented it in low level to handle the details of the API request. - Implemented try-catch-finally block to handle exceptions. - Implemented withCredentials block to handle authentication. - Implemented try-with-resources block to handle resources. - Implemented logger to log the status of the build. - Implemented logger to log the response from the API. - Implemented logger to log the error message from the API.</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details>
+<summary><strong>Phase 2: Bitbucket API HTTP Communication Implementation and Debugging (21 commits)</strong></summary>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Commit</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2025-05-02</td>
+<td><code>e62b93f</code></td>
+<td>Added package imports to apiHelper.groovy</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>43a73e0</code></td>
+<td>Fixed Compail error</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>d17333e</code></td>
+<td>Try to fix Compile Error</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>6e519c7</code></td>
+<td>Add print StackTrace Error message code</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>d60a705</code></td>
+<td>Try to print stacktrace error message</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>ef6406c</code></td>
+<td>Add more logging for HTTP Request</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>a3011db</code></td>
+<td>Added error type for HTTP request</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>ea71fb8</code></td>
+<td>Try a new way to implement bitbucket api</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>97fe87b</code></td>
+<td>Use StringBuilder not steam Collectors</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>dc76f45</code></td>
+<td>Refactor SendBuildStatusForCommit Bitbucket API with HttpClient Class</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>72beb1f</code></td>
+<td>Improve error logging</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>a761924</code></td>
+<td>Fixed Compiler Error</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>aeae874</code></td>
+<td>slightly touch StackTrace logging output</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>39725c6</code></td>
+<td>Refactor Bitbucket API call</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>cd080f8</code></td>
+<td>Added missing package importing in bitbucketApi groovy</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>a4bcc06</code></td>
+<td>Added missing package in BitbucketApiClient groovy</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>4a9fe5b</code></td>
+<td>Try to fix closing chuck expected error during Bitbucket API Communication</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>d0af7e3</code></td>
+<td>Try to fix closing chunk expected second attempt</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>34e90c3</code></td>
+<td>Missing variable declaralation</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>37980ea</code></td>
+<td>slightly touch up logging message</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>cff33c3</code></td>
+<td>Polishing Logging</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details>
+<summary><strong>Phase 3: ShellScript Helper Refactoring (8 commits)</strong></summary>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Commit</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2025-05-02</td>
+<td><code>9eaf277</code></td>
+<td>Refactor try-out for ShellScript</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>7d4222a</code></td>
+<td>Refactor ShellScriptHelper and Create ShellScripts as list of shellscript, delete ShellParams groovy</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>3678a3f</code></td>
+<td>Try to fix Compaile Error</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>5a27ee0</code></td>
+<td>Try to fix Compaile Error</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>555a11b</code></td>
+<td>Try to fix Compaile Error</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>668d621</code></td>
+<td>Fixed shellScriptHelper Implementation</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>3fc2917</code></td>
+<td>Modified Data Type check and Empty Condition logic in validateShMap function, for GString</td>
+</tr>
+<tr>
+<td>2025-05-02</td>
+<td><code>ee64f56</code></td>
+<td>Mark unnecessary Jenkins Environment and Create a new Stage</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details>
+<summary><strong>Phase 4: Git Shell Scripts Implementation and stageProjectPrepare (26 commits)</strong></summary>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Commit</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2025-05-03</td>
+<td><code>ff92c62</code></td>
+<td>Test isDirectory function</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>c862433</code></td>
+<td>Test fileExists function instead of isDirectory</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>220bb9e</code></td>
+<td>Fixed incorrect rutern data type for fileExists function</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>5585b83</code></td>
+<td>new stageCheckoutSourceCode groovy Checkpoint</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>9c44606</code></td>
+<td>Fixed GIT_SHOW_CUREENT_BRANCH Closure</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>cf092a4</code></td>
+<td>Fixed ShellScripts.groovy to return the current branch name</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>aba6b68</code></td>
+<td>Fixed GIT_SHOW_CURRENT_BRANCH Closure to return the current branch name</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>6dbf4e0</code></td>
+<td>Fixed GIT_SHOW_CURRENT_BRANCH</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>7551ee8</code></td>
+<td>Git test with pwd property</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>c479cb6</code></td>
+<td>Fixed incorrect implementation for sh step and correct javadoc for ShellScripts groovy</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>8dda64b</code></td>
+<td>Fixing GIT_SHOW_CURRENT_BRANCH Closure</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>1858dcf</code></td>
+<td>Upgrade Shell Script Label</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>ca2cbb1</code></td>
+<td>sh returnstdout test</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>da273ac</code></td>
+<td>Improved logging</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>55a0fbe</code></td>
+<td>Refactor a part of cloneOrUpdateRepo and test</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>9bf0779</code></td>
+<td>Commented out the error log for the returnStdout option in shellScriptHelper.groovy, due to the better error handling in the sh step.</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>3e84f96</code></td>
+<td>Implement Git source code checkout and synchronization logic - Created GIT_CHECK_ORIGIN_BRANCH_EXISTS to check if a branch exists on the 'origin' remote repository. - Created GIT_GET_ORIGIN_DEFAULT_BRANCH to get the default branch name for the 'origin' remote repository. - Changed the way to handle the error in shellScriptHelper.groovy, due to the better error handling in the sh step. - Implemented the Git Clone and Checkout logic in stageCheckoutSourceCode.groovy. - Implemented a part of the Synchronize with Default Branch logic in stageCheckoutSourceCode.groovy.</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>9b13c46</code></td>
+<td>New shell scripts and updated existing shell scripts: - Created GIT_CHECK_ORIGIN_BRANCH_EXISTS to check if a branch exists on the 'origin' remote repository. - Fixed to use single quotes instead of triple quotes for shell scripts for GIT_GET_ORIGIN_DEFAULT_BRANCH. - Implemented GIT_CHECK_BRANCH_EXISTS to check if a branch exists locally or on the 'origin' remote.</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>ae9c014</code></td>
+<td>Pipeline stage name change, Git sync check addition, and success logic modification - Rename stageCheckoutSourceCode to stageProjectPrepare - Created GIT_CHECK_UP_TO_DATE_WITH_REMOTE to check if the local branch is up to date with the remote branch - Rename stage names in Jenkinsfile - Modified how to handle successful logic in executeReturnStatus</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>ecf3e97</code></td>
+<td>Add unstaged changes to previous commit</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>2bf21e7</code></td>
+<td>Improved shell script helper function - Delete unused shell script helper function - Simplify ShellScriptHelper logging messages</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>89c1cca</code></td>
+<td>Created / Implemented GIT_CHECK_IS_REMOTE_BRANCH_ANCESTOR shell script helper function</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>c995312</code></td>
+<td>Implemented new shell script helper functions in stageProjectPrepare - Created GIT_CHECK_IS_REMOTE_BRANCH_ANCESTOR shell script helper function - Created GIT_MERGE_ORIGIN_BRANCH shell script helper function - Created GIT_LFS_FETCH_AND_CHECKOUT shell script helper function</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>432a130</code></td>
+<td>Improved shell script logging</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>8eb0779</code></td>
+<td>Commented out Prepare Workspace refacted into Jenkins Initialization and Project Preparation stages</td>
+</tr>
+<tr>
+<td>2025-05-03</td>
+<td><code>7439856</code></td>
+<td>Replace COMMIT_HASH with GIT_COMMIT</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details>
+<summary><strong>Phase 5: GitLibrary/ShellLibrary Separation and BitbucketApiService (16 commits)</strong></summary>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Commit</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2025-05-04</td>
+<td><code>8d6a236</code></td>
+<td>Refactored Stages Implemented and Deleted Previous</td>
+</tr>
+<tr>
+<td>2025-05-04</td>
+<td><code>aeeef99</code></td>
+<td>Refactoring: ShellScripts into Libraries and Integration: - ShellScripts was refactored into GitLibrary and ShellLibrary - Implemented the refactored Libraries in stageProjectPrepare and stageInitialization</td>
+</tr>
+<tr>
+<td>2025-05-04</td>
+<td><code>9702e3f</code></td>
+<td>quick fixed incorrect class name usage</td>
+</tr>
+<tr>
+<td>2025-05-04</td>
+<td><code>c637009</code></td>
+<td>Implementation of Bitbucket API and Refactored related functions - Created BitbucketApiService and BitbucketApiLibrary - Created bitbucketApiHelper - Refactored stageInitialization</td>
+</tr>
+<tr>
+<td>2025-05-04</td>
+<td><code>504cbdd</code></td>
+<td>Add missing Class declaration</td>
+</tr>
+<tr>
+<td>2025-05-04</td>
+<td><code>551c40d</code></td>
+<td>Implmented not using BitbucketApiLibrary</td>
+</tr>
+<tr>
+<td>2025-05-04</td>
+<td><code>3b38c6b</code></td>
+<td>Add missing pakcage import</td>
+</tr>
+<tr>
+<td>2025-05-04</td>
+<td><code>9454891</code></td>
+<td>Try to fix</td>
+</tr>
+<tr>
+<td>2025-05-04</td>
+<td><code>91ef0c6</code></td>
+<td>Delete not use package import</td>
+</tr>
+<tr>
+<td>2025-05-04</td>
+<td><code>f1c0a8e</code></td>
+<td>Try to fix bitbucket API function</td>
+</tr>
+<tr>
+<td>2025-05-04</td>
+<td><code>c8cd439</code></td>
+<td>try to use function</td>
+</tr>
+<tr>
+<td>2025-05-04</td>
+<td><code>97dd803</code></td>
+<td>createBuildStatusForCommit</td>
+</tr>
+<tr>
+<td>2025-05-04</td>
+<td><code>2dda24f</code></td>
+<td>Try to fix api function variables</td>
+</tr>
+<tr>
+<td>2025-05-04</td>
+<td><code>94ba7ec</code></td>
+<td>Fixed calling incorrec method name</td>
+</tr>
+<tr>
+<td>2025-05-04</td>
+<td><code>b6d8f82</code></td>
+<td>Fixed Method Exception</td>
+</tr>
+<tr>
+<td>2025-05-04</td>
+<td><code>efa5c44</code></td>
+<td>Improved Http request logic and logging</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details>
+<summary><strong>Phase 6: Shell Library Cleanup and Completion (6 commits)</strong></summary>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Commit</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2025-05-05</td>
+<td><code>3278c38</code></td>
+<td>Rename all Shell Library Clsoure for name convention</td>
+</tr>
+<tr>
+<td>2025-05-05</td>
+<td><code>341252c</code></td>
+<td>Implement dockerInfo shellscript into shellLibrary</td>
+</tr>
+<tr>
+<td>2025-05-05</td>
+<td><code>26c2199</code></td>
+<td>Add missing package import in PipelineForJenkins jenkinsfile</td>
+</tr>
+<tr>
+<td>2025-05-05</td>
+<td><code>2c5eb16</code></td>
+<td>Implement GroovyLint ShellScript into ShellLibrary</td>
+</tr>
+<tr>
+<td>2025-05-05</td>
+<td><code>99387da</code></td>
+<td>Added Missing Property for GroovyLint</td>
+</tr>
+<tr>
+<td>2025-05-05</td>
+<td><code>48f4295</code></td>
+<td>Take unnecessary log message in ShellLibrary GroovyLint script property</td>
+</tr>
+</tbody>
+</table>
+</details>
+<hr />
+<h2 id="3-phase-by-phase-detailed-analysis">3. Phase-by-Phase Detailed Analysis</h2>
+<h3 id="31-phase-1-jenkins-environment-test-and-bitbucket-api-initial-implementation">3.1 Phase 1: Jenkins Environment Test and Bitbucket API Initial Implementation</h3>
+<details>
+<summary><strong>View Details</strong></summary>
+<p><strong>Duration</strong>: 2025-05-01 (7 commits)</p>
+<p><strong>Goal</strong>: Understand Jenkins environment variables and initial Bitbucket Cloud API implementation</p>
+<h4 id="step-1-jenkins-environment-variable-test-dd02d58-ab3b6a6">Step 1: Jenkins Environment Variable Test (<code>dd02d58</code> ~ <code>ab3b6a6</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Commit</th>
+<th>Work</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dd02d58</code></td>
+<td>Jenkins environment variable output test</td>
+</tr>
+<tr>
+<td><code>ea2d6bc</code> ~ <code>612b8e9</code></td>
+<td>repo:push event test</td>
+</tr>
+<tr>
+<td><code>4fce553</code> ~ <code>ab3b6a6</code></td>
+<td>Replace PR_BRANCH with GIT_BRANCH</td>
+</tr>
+</tbody>
+</table>
+<h4 id="step-2-bitbucket-api-initial-implementation-8b062fc-12dcf8d">Step 2: Bitbucket API Initial Implementation (<code>8b062fc</code> ~ <code>12dcf8d</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Commit</th>
+<th>Work</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>8b062fc</code></td>
+<td>Delete full commit hash function (use GIT_COMMIT environment variable)</td>
+</tr>
+<tr>
+<td><code>12dcf8d</code></td>
+<td>Implement <code>sendBuildStatusForCommit</code> method: try-catch-finally, withCredentials, logger integration</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Learning Points</strong>:
+- Jenkins provides full commit hash via <code>GIT_COMMIT</code> environment variable
+- Access commit info via environment variable without separate shell command</p>
+</details>
+<hr />
+<h3 id="32-phase-2-bitbucket-api-http-communication-implementation-and-debugging">3.2 Phase 2: Bitbucket API HTTP Communication Implementation and Debugging</h3>
+<details>
+<summary><strong>View Details</strong></summary>
+<p><strong>Duration</strong>: 2025-05-02 first half (21 commits)</p>
+<p><strong>Goal</strong>: Implement and debug Bitbucket Cloud REST API HTTP communication</p>
+<h4 id="problem-solving-process">Problem Solving Process</h4>
+<table>
+<thead>
+<tr>
+<th>Commit</th>
+<th>Attempt</th>
+<th>Problem</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>e62b93f</code></td>
+<td>Added package import</td>
+<td>-</td>
+<td>Added import to apiHelper.groovy</td>
+</tr>
+<tr>
+<td><code>43a73e0</code> ~ <code>d17333e</code></td>
+<td>Initial implementation</td>
+<td>Compile Error</td>
+<td>Fixed syntax errors</td>
+</tr>
+<tr>
+<td><code>6e519c7</code> ~ <code>d60a705</code></td>
+<td>Error logging</td>
+<td>StackTrace not visible</td>
+<td>Added print StackTrace code</td>
+</tr>
+<tr>
+<td><code>ef6406c</code> ~ <code>a3011db</code></td>
+<td>HTTP logging</td>
+<td>Need request/response verification</td>
+<td>Added error type logging</td>
+</tr>
+<tr>
+<td><code>ea71fb8</code> ~ <code>97fe87b</code></td>
+<td>HttpClient implementation</td>
+<td>Stream Collectors issue</td>
+<td>Changed to StringBuilder</td>
+</tr>
+<tr>
+<td><code>dc76f45</code></td>
+<td>Refactoring</td>
+<td>-</td>
+<td>Organized into HttpClient Class</td>
+</tr>
+<tr>
+<td><code>72beb1f</code> ~ <code>aeae874</code></td>
+<td>Error logging improvement</td>
+<td>Compiler Error</td>
+<td>Fixed and improved StackTrace output</td>
+</tr>
+<tr>
+<td><code>39725c6</code> ~ <code>a4bcc06</code></td>
+<td>API call refactoring</td>
+<td>Missing package</td>
+<td>Added import</td>
+</tr>
+<tr>
+<td><code>4a9fe5b</code> ~ <code>d0af7e3</code></td>
+<td>HTTP communication</td>
+<td>"closing chunk expected"</td>
+<td>Fixed chunk transfer method</td>
+</tr>
+<tr>
+<td><code>34e90c3</code> ~ <code>cff33c3</code></td>
+<td>Finalization</td>
+<td>Missing variable declaration</td>
+<td>Cleaned up logging</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Learning Points</strong>:
+- Java 11+ HttpClient is usable in Jenkins Pipeline
+- StringBuilder is more stable than Stream Collectors in Jenkins CPS</p>
+</details>
+<hr />
+<h3 id="33-phase-3-shellscript-helper-refactoring">3.3 Phase 3: ShellScript Helper Refactoring</h3>
+<details>
+<summary><strong>View Details</strong></summary>
+<p><strong>Duration</strong>: 2025-05-02 second half (8 commits)</p>
+<p><strong>Goal</strong>: Refactor ShellScript execution helper and remove ShellParams</p>
+<h4 id="problem-solving-process_1">Problem Solving Process</h4>
+<table>
+<thead>
+<tr>
+<th>Commit</th>
+<th>Work</th>
+<th>Problem</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>9eaf277</code></td>
+<td>ShellScript refactoring attempt</td>
+<td>-</td>
+<td>Started structure change</td>
+</tr>
+<tr>
+<td><code>7d4222a</code></td>
+<td>Convert ShellScripts to list, delete ShellParams</td>
+<td>-</td>
+<td>Switched to Map-based</td>
+</tr>
+<tr>
+<td><code>3678a3f</code> ~ <code>555a11b</code></td>
+<td>Fix Compile Error</td>
+<td>Syntax error</td>
+<td>Fixed after 3 attempts</td>
+</tr>
+<tr>
+<td><code>668d621</code></td>
+<td>shellScriptHelper implementation complete</td>
+<td>-</td>
+<td>Final implementation</td>
+</tr>
+<tr>
+<td><code>3fc2917</code></td>
+<td>Fix validateShMap function</td>
+<td>GString type handling</td>
+<td>Improved type check logic</td>
+</tr>
+<tr>
+<td><code>ee64f56</code></td>
+<td>Clean up unnecessary env vars, create new Stage</td>
+<td>-</td>
+<td>Added stageCheckoutSourceCode</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Code Change</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1">// Before: ShellParams class</span>
+<span class="n">ShellParams</span><span class="w"> </span><span class="n">params</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ShellParams</span><span class="o">(</span><span class="nl">script:</span><span class="w"> </span><span class="s1">&#39;git fetch&#39;</span><span class="o">,</span><span class="w"> </span><span class="nl">label:</span><span class="w"> </span><span class="s1">&#39;Fetch&#39;</span><span class="o">)</span>
+
+<span class="c1">// After: Using Map</span>
+<span class="n">shellScriptHelper</span><span class="o">.</span><span class="na">execute</span><span class="o">([</span><span class="nl">script:</span><span class="w"> </span><span class="s1">&#39;git fetch&#39;</span><span class="o">,</span><span class="w"> </span><span class="nl">label:</span><span class="w"> </span><span class="s1">&#39;Fetch&#39;</span><span class="o">])</span>
+</code></pre></div></p>
+<p><strong>Learning Points</strong>:
+- Groovy GString and String are handled as different types
+- Simple Map is more flexible than classes in Jenkins Pipeline</p>
+</details>
+<hr />
+<h3 id="34-phase-4-git-shell-scripts-implementation-and-stageprojectprepare">3.4 Phase 4: Git Shell Scripts Implementation and stageProjectPrepare</h3>
+<details>
+<summary><strong>View Details</strong></summary>
+<p><strong>Duration</strong>: 2025-05-03 (26 commits)</p>
+<p><strong>Goal</strong>: Abstract Git commands as Closures and implement stageProjectPrepare Stage</p>
+<h4 id="step-1-file-existence-check-function-test-ff92c62-220bb9e">Step 1: File Existence Check Function Test (<code>ff92c62</code> ~ <code>220bb9e</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Commit</th>
+<th>Attempt</th>
+<th>Problem</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ff92c62</code></td>
+<td>isDirectory function test</td>
+<td>-</td>
+<td>Test</td>
+</tr>
+<tr>
+<td><code>c862433</code></td>
+<td>Changed to fileExists function</td>
+<td>-</td>
+<td>Alternative attempt</td>
+</tr>
+<tr>
+<td><code>220bb9e</code></td>
+<td>Fixed return type</td>
+<td>Wrong return type</td>
+<td>Fixed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="step-2-stagecheckoutsourcecode-and-git-closure-5585b83-7439856">Step 2: stageCheckoutSourceCode and Git Closure (<code>5585b83</code> ~ <code>7439856</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Commit</th>
+<th>Work</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>5585b83</code></td>
+<td>stageCheckoutSourceCode.groovy checkpoint</td>
+</tr>
+<tr>
+<td><code>9c44606</code> ~ <code>6dbf4e0</code></td>
+<td>Fixed GIT_SHOW_CURRENT_BRANCH Closure (4 attempts)</td>
+</tr>
+<tr>
+<td><code>7551ee8</code> ~ <code>c479cb6</code></td>
+<td>pwd test, fixed sh step implementation</td>
+</tr>
+<tr>
+<td><code>8dda64b</code> ~ <code>1858dcf</code></td>
+<td>Final GIT_SHOW_CURRENT_BRANCH fix, Shell Script Label improvement</td>
+</tr>
+<tr>
+<td><code>ca2cbb1</code> ~ <code>da273ac</code></td>
+<td>returnStdout test, logging improvement</td>
+</tr>
+<tr>
+<td><code>55a0fbe</code></td>
+<td>Partial cloneOrUpdateRepo refactoring</td>
+</tr>
+<tr>
+<td><code>9bf0779</code></td>
+<td>Commented out returnStdout error log</td>
+</tr>
+<tr>
+<td><code>3e84f96</code></td>
+<td>Implemented Git checkout/sync logic: GIT_CHECK_ORIGIN_BRANCH_EXISTS, GIT_GET_ORIGIN_DEFAULT_BRANCH</td>
+</tr>
+<tr>
+<td><code>9b13c46</code></td>
+<td>Additional shell scripts: single quotes usage, GIT_CHECK_BRANCH_EXISTS</td>
+</tr>
+<tr>
+<td><code>ae9c014</code></td>
+<td>Renamed stageCheckoutSourceCode → stageProjectPrepare, added GIT_CHECK_UP_TO_DATE_WITH_REMOTE</td>
+</tr>
+<tr>
+<td><code>ecf3e97</code> ~ <code>2bf21e7</code></td>
+<td>Added unstaged changes, deleted unnecessary functions</td>
+</tr>
+<tr>
+<td><code>89c1cca</code> ~ <code>c995312</code></td>
+<td>Implemented GIT_CHECK_IS_REMOTE_BRANCH_ANCESTOR, GIT_MERGE_ORIGIN_BRANCH, GIT_LFS_FETCH_AND_CHECKOUT</td>
+</tr>
+<tr>
+<td><code>432a130</code> ~ <code>7439856</code></td>
+<td>Logging improvement, replaced COMMIT_HASH with GIT_COMMIT</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Learning Points</strong>:
+- Closure for Shell command definition enables parameterized reuse
+- Need to trim results when using <code>returnStdout: true</code></p>
+</details>
+<hr />
+<h3 id="35-phase-5-gitlibraryshelllibrary-separation-and-bitbucketapiservice">3.5 Phase 5: GitLibrary/ShellLibrary Separation and BitbucketApiService</h3>
+<details>
+<summary><strong>View Details</strong></summary>
+<p><strong>Duration</strong>: 2025-05-04 (16 commits)</p>
+<p><strong>Goal</strong>: Separate Shell Scripts into GitLibrary/ShellLibrary and implement BitbucketApiService</p>
+<h4 id="step-1-library-separation-8d6a236-9702e3f">Step 1: Library Separation (<code>8d6a236</code> ~ <code>9702e3f</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Commit</th>
+<th>Work</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>8d6a236</code></td>
+<td>Deleted previous Stage and refactored</td>
+</tr>
+<tr>
+<td><code>aeeef99</code></td>
+<td>Separated ShellScripts → GitLibrary + ShellLibrary, applied to stageProjectPrepare/stageInitialization</td>
+</tr>
+<tr>
+<td><code>9702e3f</code></td>
+<td>Fixed incorrect class name</td>
+</tr>
+</tbody>
+</table>
+<h4 id="step-2-bitbucketapiservice-implementation-c637009-efa5c44">Step 2: BitbucketApiService Implementation (<code>c637009</code> ~ <code>efa5c44</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Commit</th>
+<th>Attempt</th>
+<th>Problem</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>c637009</code></td>
+<td>Created BitbucketApiService, bitbucketApiHelper</td>
+<td>-</td>
+<td>Initial implementation</td>
+</tr>
+<tr>
+<td><code>504cbdd</code></td>
+<td>Missing Class declaration</td>
+<td>Compile Error</td>
+<td>Added</td>
+</tr>
+<tr>
+<td><code>551c40d</code></td>
+<td>Implemented without BitbucketApiLibrary</td>
+<td>-</td>
+<td>Simplified</td>
+</tr>
+<tr>
+<td><code>3b38c6b</code> ~ <code>91ef0c6</code></td>
+<td>Package import issue</td>
+<td>Compile Error</td>
+<td>Fixed/deleted import</td>
+</tr>
+<tr>
+<td><code>f1c0a8e</code> ~ <code>c8cd439</code></td>
+<td>Fixed API function</td>
+<td>Not working</td>
+<td>Attempted</td>
+</tr>
+<tr>
+<td><code>97dd803</code></td>
+<td>createBuildStatusForCommit</td>
+<td>-</td>
+<td>Function implementation</td>
+</tr>
+<tr>
+<td><code>2dda24f</code></td>
+<td>Fixed variables</td>
+<td>-</td>
+<td>Attempted</td>
+</tr>
+<tr>
+<td><code>94ba7ec</code></td>
+<td>Fixed method name</td>
+<td>Wrong method call</td>
+<td>Fixed</td>
+</tr>
+<tr>
+<td><code>b6d8f82</code></td>
+<td>Fixed Method Exception</td>
+<td>Exception occurred</td>
+<td>Fixed</td>
+</tr>
+<tr>
+<td><code>efa5c44</code></td>
+<td>Improved HTTP request logic and logging</td>
+<td>-</td>
+<td>Final cleanup</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Architecture Change</strong>:
+<div class="highlight"><pre><span></span><code>Before:  src/utils/ShellScripts.groovy (all Shell commands)
+After:   src/utils/GitLibrary.groovy
+         src/utils/ShellLibrary.groovy
+         src/service/general/BitbucketApiService.groovy
+</code></pre></div></p>
+<p><strong>Learning Points</strong>:
+- Domain-based Library separation improves management/testing
+- Encapsulate business logic (API calls) in Service layer</p>
+</details>
+<hr />
+<h3 id="36-phase-6-shell-library-cleanup-and-completion">3.6 Phase 6: Shell Library Cleanup and Completion</h3>
+<details>
+<summary><strong>View Details</strong></summary>
+<p><strong>Duration</strong>: 2025-05-05 (6 commits)</p>
+<p><strong>Goal</strong>: Unify Shell Library naming convention and implement additional scripts</p>
+<h4 id="work-by-commit">Work by Commit</h4>
+<table>
+<thead>
+<tr>
+<th>Commit</th>
+<th>Work</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>3278c38</code></td>
+<td>Unified all Shell Library Closure naming convention</td>
+</tr>
+<tr>
+<td><code>341252c</code></td>
+<td>Added DOCKER_INFO shellscript</td>
+</tr>
+<tr>
+<td><code>26c2199</code></td>
+<td>Added package import to PipelineForJenkins Jenkinsfile</td>
+</tr>
+<tr>
+<td><code>2c5eb16</code></td>
+<td>Implemented GROOVY_LINT ShellScript</td>
+</tr>
+<tr>
+<td><code>99387da</code></td>
+<td>Added missing GroovyLint Property</td>
+</tr>
+<tr>
+<td><code>48f4295</code></td>
+<td>Removed unnecessary log message</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Learning Points</strong>:
+- Consistent naming convention (<code>VERB_NOUN</code>) improves code readability
+- When adding Closure to Library, manage related properties together</p>
+</details>
+<hr />
+<h2 id="4-new-files">4. New Files</h2>
+<h3 id="41-layer-3-service-business-logic">4.1 Layer 3: Service (Business Logic)</h3>
+<h4 id="sharedlibrariessrcservicegeneralbitbucketapiservicegroovy-155-lines"><code>sharedLibraries/src/service/general/BitbucketApiService.groovy</code> (155 lines)</h4>
+<p>Bitbucket Cloud REST API client
+<div class="highlight"><pre><span></span><code><span class="kd">class</span><span class="w"> </span><span class="nc">BitbucketApiService</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="kt">def</span><span class="w"> </span><span class="n">pipeline</span>
+
+<span class="w">    </span><span class="n">BitbucketApiService</span><span class="o">(</span><span class="n">pipeline</span><span class="o">)</span><span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="k">this</span><span class="o">.</span><span class="na">pipeline</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pipeline</span>
+<span class="w">    </span><span class="o">}</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">sendBuildStatusForCommit</span><span class="o">(</span><span class="n">String</span><span class="w"> </span><span class="n">commitHash</span><span class="o">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">state</span><span class="o">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="o">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">url</span><span class="o">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">description</span><span class="o">)</span><span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="c1">// HTTP POST to Bitbucket Cloud API</span>
+<span class="w">        </span><span class="c1">// /2.0/repositories/{workspace}/{repo}/commit/{commit}/statuses/build</span>
+<span class="w">    </span><span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></p>
+<h3 id="42-layer-4-utils-libraries">4.2 Layer 4: Utils (Libraries)</h3>
+<h4 id="sharedlibrariessrcutilsgitlibrarygroovy-258-lines"><code>sharedLibraries/src/utils/GitLibrary.groovy</code> (258 lines)</h4>
+<p>Git command library
+<div class="highlight"><pre><span></span><code><span class="kd">class</span><span class="w"> </span><span class="nc">GitLibrary</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="c1">// Check branch existence</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="n">Closure</span><span class="w"> </span><span class="n">GIT_CHECK_ORIGIN_BRANCH_EXISTS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">branchName</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">        </span><span class="s2">&quot;git ls-remote --heads origin ${branchName} | grep -q ${branchName}&quot;</span>
+<span class="w">    </span><span class="o">}</span>
+
+<span class="w">    </span><span class="c1">// Get default branch</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="n">Closure</span><span class="w"> </span><span class="n">GIT_GET_ORIGIN_DEFAULT_BRANCH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;git remote show origin | grep &#39;HEAD branch&#39; | cut -d&#39; &#39; -f5&quot;</span>
+<span class="w">    </span><span class="o">}</span>
+
+<span class="w">    </span><span class="c1">// Check if remote branch is ancestor</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="n">Closure</span><span class="w"> </span><span class="n">GIT_CHECK_IS_REMOTE_BRANCH_ANCESTOR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">baseBranch</span><span class="o">,</span><span class="w"> </span><span class="n">targetBranch</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">        </span><span class="s2">&quot;git merge-base --is-ancestor origin/${baseBranch} origin/${targetBranch}&quot;</span>
+<span class="w">    </span><span class="o">}</span>
+
+<span class="w">    </span><span class="c1">// Merge remote branch</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="n">Closure</span><span class="w"> </span><span class="n">GIT_MERGE_ORIGIN_BRANCH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">branchName</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">        </span><span class="s2">&quot;git merge origin/${branchName} --no-edit&quot;</span>
+<span class="w">    </span><span class="o">}</span>
+
+<span class="w">    </span><span class="c1">// Git LFS fetch and checkout</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="n">Closure</span><span class="w"> </span><span class="n">GIT_LFS_FETCH_AND_CHECKOUT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;git lfs fetch --all &amp;&amp; git lfs checkout&quot;</span>
+<span class="w">    </span><span class="o">}</span>
+
+<span class="w">    </span><span class="c1">// Check if local branch is synced with remote</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="n">Closure</span><span class="w"> </span><span class="n">GIT_CHECK_UP_TO_DATE_WITH_REMOTE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">branchName</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">        </span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">        LOCAL=$(git rev-parse HEAD)</span>
+<span class="s1">        REMOTE=$(git rev-parse origin/${branchName})</span>
+<span class="s1">        [ &quot;$LOCAL&quot; = &quot;$REMOTE&quot; ]</span>
+<span class="s1">        &#39;&#39;&#39;</span>
+<span class="w">    </span><span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></p>
+<h4 id="sharedlibrariessrcutilsshelllibrarygroovy-210-lines"><code>sharedLibraries/src/utils/ShellLibrary.groovy</code> (210 lines)</h4>
+<p>General Shell command library
+<div class="highlight"><pre><span></span><code><span class="kd">class</span><span class="w"> </span><span class="nc">ShellLibrary</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="c1">// Get Docker info</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="n">Closure</span><span class="w"> </span><span class="n">DOCKER_INFO</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="s2">&quot;docker info&quot;</span>
+<span class="w">    </span><span class="o">}</span>
+
+<span class="w">    </span><span class="c1">// Execute Groovy Lint</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="n">Closure</span><span class="w"> </span><span class="n">GROOVY_LINT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">targetPath</span><span class="o">,</span><span class="w"> </span><span class="n">configPath</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">        </span><span class="s2">&quot;npm-groovy-lint --path ${targetPath} --config ${configPath}&quot;</span>
+<span class="w">    </span><span class="o">}</span>
+
+<span class="w">    </span><span class="c1">// Copy file</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="n">Closure</span><span class="w"> </span><span class="n">COPY_FILE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">source</span><span class="o">,</span><span class="w"> </span><span class="n">destination</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">        </span><span class="s2">&quot;cp ${source} ${destination}&quot;</span>
+<span class="w">    </span><span class="o">}</span>
+
+<span class="w">    </span><span class="c1">// Check directory existence</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="n">Closure</span><span class="w"> </span><span class="n">CHECK_DIR_EXISTS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">        </span><span class="s2">&quot;[ -d ${path} ]&quot;</span>
+<span class="w">    </span><span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></p>
+<h3 id="43-layer-2-vars-entry-points">4.3 Layer 2: vars/ (Entry Points)</h3>
+<h4 id="sharedlibrariesvarsbitbucketapihelpergroovy-33-lines"><code>sharedLibraries/vars/bitbucketApiHelper.groovy</code> (33 lines)</h4>
+<div class="highlight"><pre><span></span><code><span class="kt">def</span><span class="w"> </span><span class="nf">sendBuildStatus</span><span class="o">(</span><span class="n">String</span><span class="w"> </span><span class="n">state</span><span class="o">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">description</span><span class="o">)</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="n">BitbucketApiService</span><span class="w"> </span><span class="n">service</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">BitbucketApiService</span><span class="o">(</span><span class="k">this</span><span class="o">)</span>
+<span class="w">    </span><span class="n">service</span><span class="o">.</span><span class="na">sendBuildStatusForCommit</span><span class="o">(</span>
+<span class="w">        </span><span class="n">env</span><span class="o">.</span><span class="na">GIT_COMMIT</span><span class="o">,</span>
+<span class="w">        </span><span class="n">state</span><span class="o">,</span>
+<span class="w">        </span><span class="n">env</span><span class="o">.</span><span class="na">BUILD_TAG</span><span class="o">,</span>
+<span class="w">        </span><span class="n">env</span><span class="o">.</span><span class="na">BUILD_URL</span><span class="o">,</span>
+<span class="w">        </span><span class="n">description</span>
+<span class="w">    </span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div>
+<h4 id="sharedlibrariesvarsstageprojectpreparegroovy-84-lines"><code>sharedLibraries/vars/stageProjectPrepare.groovy</code> (84 lines)</h4>
+<p>Git checkout and project preparation Stage
+<div class="highlight"><pre><span></span><code><span class="kt">def</span><span class="w"> </span><span class="nf">call</span><span class="o">(</span><span class="n">Map</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">[:])</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="n">logger</span><span class="o">.</span><span class="na">stageStart</span><span class="o">(</span><span class="n">env</span><span class="o">.</span><span class="na">STAGE_NAME</span><span class="o">)</span>
+
+<span class="w">    </span><span class="n">logger</span><span class="o">.</span><span class="na">stepsGroupStart</span><span class="o">(</span><span class="s1">&#39;Git Repository Setup&#39;</span><span class="o">)</span>
+<span class="w">    </span><span class="c1">// Use GitLibrary functions</span>
+<span class="w">    </span><span class="n">shellScriptHelper</span><span class="o">.</span><span class="na">execute</span><span class="o">(</span><span class="n">GitLibrary</span><span class="o">.</span><span class="na">GIT_CHECK_ORIGIN_BRANCH_EXISTS</span><span class="o">(</span><span class="n">env</span><span class="o">.</span><span class="na">PR_BRANCH</span><span class="o">))</span>
+<span class="w">    </span><span class="c1">// ...</span>
+
+<span class="w">    </span><span class="n">logger</span><span class="o">.</span><span class="na">stepsGroupEnd</span><span class="o">(</span><span class="s1">&#39;Git Repository Setup&#39;</span><span class="o">)</span>
+<span class="w">    </span><span class="n">logger</span><span class="o">.</span><span class="na">stageEnd</span><span class="o">(</span><span class="n">env</span><span class="o">.</span><span class="na">STAGE_NAME</span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div></p>
+<h2 id="5-4-layer-architecture-established">5. 4-Layer Architecture Established</h2>
+<div class="highlight"><pre><span></span><code>devops-jenkins-linux/
+├── */Jenkinsfile                      # Layer 1: Entry Point
+│   ├── DLXJenkins/Jenkinsfile
+│   ├── DLXJenkins/JenkinsfileDeployment
+│   ├── JsJenkins/Jenkinsfile
+│   ├── JsJenkins/JenkinsfileDeployment
+│   └── PipelineForJenkins/Jenkinsfile
+│
+└── sharedLibraries/
+    ├── vars/                          # Layer 2: Orchestration
+    │   ├── stageInitialization.groovy
+    │   ├── stageProjectPrepare.groovy
+    │   ├── shellScriptHelper.groovy
+    │   ├── bitbucketApiHelper.groovy
+    │   └── logger.groovy (Cross-Cutting)
+    │
+    └── src/
+        ├── service/                   # Layer 3: Services
+        │   └── general/
+        │       └── BitbucketApiService.groovy
+        │
+        ├── utils/                     # Layer 4: Utilities
+        │   ├── GitLibrary.groovy
+        │   └── ShellLibrary.groovy
+        │
+        └── resource/                  # Layer 4: Utilities (Constants)
+            └── Status.groovy
+</code></pre></div>
+<h2 id="6-core-patterns">6. Core Patterns</h2>
+<h3 id="61-shell-command-abstraction-using-closure">6.1 Shell Command Abstraction Using Closure</h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Definition (GitLibrary.groovy)</span>
+<span class="kd">static</span><span class="w"> </span><span class="n">Closure</span><span class="w"> </span><span class="n">GIT_FETCH_ORIGIN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">branchName</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">    </span><span class="s2">&quot;git fetch origin ${branchName}&quot;</span>
+<span class="o">}</span>
+
+<span class="c1">// Usage (stageProjectPrepare.groovy)</span>
+<span class="n">shellScriptHelper</span><span class="o">.</span><span class="na">execute</span><span class="o">([</span>
+<span class="w">    </span><span class="nl">script:</span><span class="w"> </span><span class="n">GitLibrary</span><span class="o">.</span><span class="na">GIT_FETCH_ORIGIN</span><span class="o">(</span><span class="n">env</span><span class="o">.</span><span class="na">PR_BRANCH</span><span class="o">),</span>
+<span class="w">    </span><span class="nl">label:</span><span class="w"> </span><span class="s1">&#39;Fetch PR branch from origin&#39;</span>
+<span class="o">])</span>
+</code></pre></div>
+<h3 id="62-advantages">6.2 Advantages</h3>
+<ol>
+<li><strong>Type Safety</strong>: Clearly define parameters with Closure</li>
+<li><strong>Reusability</strong>: Use same Git commands in multiple Stages</li>
+<li><strong>Testability</strong>: Test Shell command string generation logic independently</li>
+<li><strong>Documentation</strong>: Can add descriptions for each command</li>
+</ol>
+<hr />
+<h2 id="7-bitbucket-api-integration">7. Bitbucket API Integration</h2>
+<h3 id="71-build-status-reporting-flow">7.1 Build Status Reporting Flow</h3>
+<div class="highlight"><pre><span></span><code>Pipeline Start
+    ↓
+bitbucketApiHelper.sendBuildStatus(&#39;INPROGRESS&#39;, &#39;Build started&#39;)
+    ↓
+... (build execution) ...
+    ↓
+bitbucketApiHelper.sendBuildStatus(&#39;SUCCESSFUL&#39;, &#39;Build completed&#39;)
+    or
+bitbucketApiHelper.sendBuildStatus(&#39;FAILED&#39;, &#39;Build failed&#39;)
+</code></pre></div>
+<h3 id="72-verification-in-bitbucket-pr">7.2 Verification in Bitbucket PR</h3>
+<ul>
+<li>Build status badge displayed on PR page</li>
+<li>Per-commit build result verification possible</li>
+</ul>
+<hr />
+<h2 id="8-benefits">8. Benefits</h2>
+<ol>
+<li><strong>Centralization</strong>: Git/Shell commands managed in one place</li>
+<li><strong>Consistency</strong>: All pipelines use same commands</li>
+<li><strong>Visibility</strong>: Real-time build status verification in Bitbucket</li>
+<li><strong>Maintainability</strong>: Only modify library when changing commands</li>
+</ol>
+<hr />
+<h2 id="9-next-steps">9. Next Steps</h2>
+<p>→ Phase 4: Full Pipeline Refactoring and Stage Modularization</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes", "navigation.top", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

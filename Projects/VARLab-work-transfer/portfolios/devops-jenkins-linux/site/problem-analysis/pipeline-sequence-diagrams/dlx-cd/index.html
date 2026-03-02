@@ -1,0 +1,3206 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Jenkins refactoring, CI/CD architecture, technical debt, software smells, design patterns, 4-layer architecture, shared library">
+      
+      
+        <meta name="author" content="Jindo Kim">
+      
+      
+      
+        <link rel="prev" href="../dlx-ci/">
+      
+      
+        <link rel="next" href="../js-ci/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>DLXJenkins CD - Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#dlx-cd-pipeline-sequence-diagrams" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns" class="md-header__button md-logo" aria-label="Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              DLXJenkins CD
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns" class="md-nav__button md-logo" aria-label="Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Problem Analysis
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Problem Analysis
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Problem Analysis Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../detailed-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detailed Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DRY-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DRY Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Sequence Diagrams
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pipeline Sequence Diagrams
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../domain-mapping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain Mapping
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dlx-ci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DLXJenkins CI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DLXJenkins CD
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DLXJenkins CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-sequence-diagrams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Sequence Diagrams?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#domain-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Domain Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overall-pipeline-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overall Pipeline Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-1-delete-merged-branch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 1: Delete Merged Branch
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-2-prepare-workspace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 2: Prepare WORKSPACE
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-3-linting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 3: Linting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-4-editmode-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 4: EditMode Tests
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-5-playmode-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 5: PlayMode Tests
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-6-build-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 6: Build Project
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-7-deploy-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 7: Deploy Build
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-alwayssuccessfailureaborted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post: always/success/failure/aborted
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#observations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Observations
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../js-ci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JsJenkins CI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../js-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JsJenkins CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../jenkins-ci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PipelineForJenkins CI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Per-File Analysis
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Per-File Analysis
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_1" id="__nav_2_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    generalHelper
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    generalHelper
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-generalHelper/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-generalHelper/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../01-generalHelper/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_2" id="__nav_2_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    jsHelper
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    jsHelper
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-jsHelper/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-jsHelper/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../02-jsHelper/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_3" id="__nav_2_6_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    unityHelper
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    unityHelper
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-unityHelper/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-unityHelper/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../03-unityHelper/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_4" id="__nav_2_6_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DLXJenkins-Jenkinsfile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    DLXJenkins-Jenkinsfile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-DLXJenkins-Jenkinsfile/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-DLXJenkins-Jenkinsfile/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../04-DLXJenkins-Jenkinsfile/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_5" id="__nav_2_6_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DLXJenkins-JenkinsfileDeployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    DLXJenkins-JenkinsfileDeployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-DLXJenkins-JenkinsfileDeployment/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-DLXJenkins-JenkinsfileDeployment/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../05-DLXJenkins-JenkinsfileDeployment/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_6" id="__nav_2_6_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JsJenkins-Jenkinsfile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    JsJenkins-Jenkinsfile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-JsJenkins-Jenkinsfile/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-JsJenkins-Jenkinsfile/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../06-JsJenkins-Jenkinsfile/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_7" id="__nav_2_6_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JsJenkins-JenkinsfileDeployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    JsJenkins-JenkinsfileDeployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../07-JsJenkins-JenkinsfileDeployment/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../07-JsJenkins-JenkinsfileDeployment/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../07-JsJenkins-JenkinsfileDeployment/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_8" id="__nav_2_6_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PipelineForJenkins-Jenkinsfile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    PipelineForJenkins-Jenkinsfile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../08-PipelineForJenkins-Jenkinsfile/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../08-PipelineForJenkins-Jenkinsfile/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../08-PipelineForJenkins-Jenkinsfile/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Problem Solving
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Problem Solving
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-solving/solution-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solution Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-solving/solution-by-layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solution by Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-solving/solution-by-feature/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solution by Feature
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-solving/logger-system-design-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Logger System Design and Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-solving/domain-driven-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain-Driven Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-solving/jenkins-cps-serialization-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jenkins CPS Serialization Diagram
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-solving/pull-request-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pull Request Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_8" id="__nav_3_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation Phases
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Implementation Phases
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-solving/phase-0-global-trusted-shared-library-setup/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 0 - Global Trusted Shared Library Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-solving/phase-1-shellscript-modularization-and-initialization-stage/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 1 - Shell Script Modularization and Initialization Stage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-solving/phase-2-3-level-logger-system-implementation/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 2 - 3-Level Logger System Implementation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-solving/phase-3-bitbucket-api-and-shell-library-integration/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 3 - Bitbucket API and Shell Library Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../problem-solving/phase-4-full-pipeline-refactoring-and-stage-modularization/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 4 - Full Pipeline Refactoring and Stage Modularization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="dlx-cd-pipeline-sequence-diagrams">DLX CD Pipeline Sequence Diagrams</h1>
+<blockquote>
+<p><strong>Analysis Target</strong>: <code>DLXJenkins/JenkinsfileDeployment</code> (DLX Unity CD Pipeline)</p>
+<p><strong>Related</strong>: <a href="../domain-mapping/">Domain Mapping Summary</a></p>
+</blockquote>
+<hr />
+<h2 id="why-sequence-diagrams">Why Sequence Diagrams?</h2>
+<blockquote>
+<p><strong>Q: Why use Sequence Diagrams for Jenkins Pipeline analysis?</strong></p>
+<p>A: Jenkins Pipeline is <strong>procedural code</strong>. Unlike OOP where classes naturally define domain boundaries, procedural code mixes multiple domains within sequential execution flow. Sequence Diagrams visualize the <strong>call flow</strong> between components, making it easier to identify which domains are involved at each stage.</p>
+<p><strong>Q: What is the goal of this analysis?</strong></p>
+<p>A: To <strong>identify domains by function</strong>. By tracing "who calls what", I can classify each function into its domain (Git, Bitbucket, Unity, etc.) and detect where domain boundaries are violated (e.g., one function mixing multiple domains).</p>
+</blockquote>
+<hr />
+<h2 id="domain-summary">Domain Summary</h2>
+<h3 id="helper-domains-used">Helper Domains Used</h3>
+<table>
+<thead>
+<tr>
+<th>Helper</th>
+<th>Domain</th>
+<th>Functions Called</th>
+<th>Used Stage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>generalHelper</td>
+<td>Git</td>
+<td><code>checkoutBranch</code></td>
+<td>Post</td>
+</tr>
+<tr>
+<td>generalHelper</td>
+<td>Bitbucket</td>
+<td><code>getFullCommitHash</code>, <code>sendBuildStatus</code></td>
+<td>Delete Merged Branch, Prepare WORKSPACE, Post</td>
+</tr>
+<tr>
+<td>generalHelper</td>
+<td>Web Server</td>
+<td><code>cleanMergedBranchFromWebServer</code></td>
+<td>Delete Merged Branch</td>
+</tr>
+<tr>
+<td>generalHelper</td>
+<td>Parsing</td>
+<td><code>parseJson</code>, <code>parseTicketNumber</code></td>
+<td>Delete Merged Branch</td>
+</tr>
+<tr>
+<td>generalHelper</td>
+<td>File System</td>
+<td><code>cleanUpPRBranch</code></td>
+<td>Delete Merged Branch</td>
+</tr>
+<tr>
+<td>unityHelper</td>
+<td>Unity CLI</td>
+<td><code>runUnityStage</code></td>
+<td>Prepare WORKSPACE, EditMode, PlayMode, Build Project</td>
+</tr>
+<tr>
+<td>unityHelper</td>
+<td>Unity Installation</td>
+<td><code>getUnityExecutable</code></td>
+<td>Prepare WORKSPACE</td>
+</tr>
+</tbody>
+</table>
+<h3 id="jenkinsfile-direct-calls">Jenkinsfile Direct Calls</h3>
+<table>
+<thead>
+<tr>
+<th>Domain</th>
+<th>Direct Call</th>
+<th>Used Stage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jenkins Pipeline DSL</td>
+<td><code>pipeline</code>, <code>stages</code>, <code>post</code>, <code>script</code>, <code>dir</code>, <code>credentials</code></td>
+<td>All</td>
+</tr>
+<tr>
+<td>Git</td>
+<td><code>git clone</code>, <code>git checkout</code>, <code>git reset</code>, <code>git pull</code></td>
+<td>Prepare WORKSPACE</td>
+</tr>
+<tr>
+<td>File System</td>
+<td><code>mkdir -p</code>, <code>cp</code>, <code>mv</code></td>
+<td>Linting, EditMode, Build Project</td>
+</tr>
+<tr>
+<td>Linting (Bash)</td>
+<td><code>sh Linting.bash</code></td>
+<td>Linting</td>
+</tr>
+<tr>
+<td>Web Server (SSH/SCP)</td>
+<td><code>ssh mkdir</code>, <code>ssh chown</code>, <code>scp</code>, <code>ssh bash UpdateBuildURL.sh</code></td>
+<td>Deploy Build</td>
+</tr>
+</tbody>
+</table>
+<h3 id="domain-mapping-by-stage">Domain Mapping by Stage</h3>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th style="text-align: center;">Git</th>
+<th style="text-align: center;">Bitbucket</th>
+<th style="text-align: center;">Unity CLI</th>
+<th style="text-align: center;">Unity Install</th>
+<th style="text-align: center;">Web Server</th>
+<th style="text-align: center;">Parsing</th>
+<th style="text-align: center;">File System</th>
+<th style="text-align: center;">Linting</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Delete Merged Branch</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>Prepare WORKSPACE</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>Linting</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td>EditMode Tests</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>PlayMode Tests</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>Build Project</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>Deploy Build</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td>Post</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="overall-pipeline-overview">Overall Pipeline Overview</h2>
+<pre class="mermaid"><code>flowchart LR
+    subgraph Stages
+        S1[Delete Merged Branch]
+        S2[Prepare WORKSPACE]
+        S3[Linting]
+        S4[EditMode Tests]
+        S5[PlayMode Tests]
+        S6[Build Project]
+        S7[Deploy Build]
+    end
+
+    S1 --&gt; S2 --&gt; S3 --&gt; S4 --&gt; S5 --&gt; S6 --&gt; S7
+
+    S7 --&gt; Post[Post&lt;br/&gt;always/success/failure/aborted]</code></pre>
+<hr />
+<h2 id="stage-1-delete-merged-branch">Stage 1: Delete Merged Branch</h2>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+
+    participant JF as Jenkinsfile&lt;br/&gt;(Orchestrator)
+    participant GH as generalHelper
+    participant Python as Python Scripts
+    participant BB as Bitbucket API
+    participant WS as Web Server&lt;br/&gt;(SSH/SCP)
+
+    Note over JF: Stage: Delete Merged Branch
+
+    JF-&gt;&gt;GH: load("generalHelper.groovy")
+    JF-&gt;&gt;GH: load("unityHelper.groovy")
+
+    JF-&gt;&gt;GH: parseJson()
+    Note over GH: Domain: Parsing
+    GH--&gt;&gt;JF: buildResults, stageResults
+
+    JF-&gt;&gt;JF: mainBranches.contains(DESTINATION_BRANCH)
+    Note over JF: Abort if not merging to main
+
+    JF-&gt;&gt;GH: getFullCommitHash(workspace, PR_COMMIT)
+    Note over GH: Domain: Bitbucket
+    GH-&gt;&gt;Python: get_bitbucket_commit_hash.py
+    Python-&gt;&gt;BB: GET /commits
+    BB--&gt;&gt;Python: commit hash
+    Python--&gt;&gt;GH: full commit hash
+    GH--&gt;&gt;JF: COMMIT_HASH
+
+    JF-&gt;&gt;GH: cleanUpPRBranch(PR_BRANCH)
+    Note over GH: Domain: File System
+    GH--&gt;&gt;JF: find &amp; rm -rf PR directories
+
+    JF-&gt;&gt;GH: parseTicketNumber(PR_BRANCH)
+    Note over GH: Domain: Parsing
+    GH--&gt;&gt;JF: ticketNumber
+
+    JF-&gt;&gt;GH: cleanMergedBranchFromWebServer(FOLDER_NAME, ticketNumber)
+    Note over GH: Domain: Web Server
+    GH-&gt;&gt;WS: ssh rm -rf /var/www/html/{folder}/PR-Builds/{ticket}
+    WS--&gt;&gt;GH: OK
+    GH--&gt;&gt;JF: OK</code></pre>
+<hr />
+<h2 id="stage-2-prepare-workspace">Stage 2: Prepare WORKSPACE</h2>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+
+    participant JF as Jenkinsfile&lt;br/&gt;(Orchestrator)
+    participant GH as generalHelper
+    participant UH as unityHelper
+    participant Git as Git CLI
+    participant Python as Python Scripts
+    participant BB as Bitbucket API
+    participant Unity as Unity CLI
+
+    Note over JF: Stage: Prepare WORKSPACE
+
+    Note over JF,Git: Jenkinsfile Direct Git Calls
+    alt !fileExists(PROJECT_DIR)
+        JF-&gt;&gt;Git: git clone {REPO_SSH} {PROJECT_DIR}
+    end
+
+    JF-&gt;&gt;Git: git checkout {DESTINATION_BRANCH}
+    JF-&gt;&gt;Git: git reset --hard HEAD
+    JF-&gt;&gt;Git: git pull
+
+    JF-&gt;&gt;GH: sendBuildStatus(workspace, 'INPROGRESS', commitHash, true)
+    Note over GH: Domain: Bitbucket
+    GH-&gt;&gt;Python: send_bitbucket_build_status.py -d
+    Python-&gt;&gt;BB: POST /statuses/build
+    BB--&gt;&gt;Python: OK
+
+    JF-&gt;&gt;UH: getUnityExecutable(workspace, projectDir)
+    Note over UH: Domain: Unity Installation
+    UH-&gt;&gt;Python: get_unity_version.py (executable-path)
+    Python--&gt;&gt;UH: unity path
+    UH--&gt;&gt;JF: UNITY_EXECUTABLE
+
+    JF-&gt;&gt;UH: runUnityStage('Rider', errorMsg)
+    Note over UH: Domain: Unity CLI
+    UH-&gt;&gt;UH: runUnityBatchMode('Rider')
+    UH-&gt;&gt;Unity: unity -batchmode -executeMethod Rider.SyncSolution
+    Unity--&gt;&gt;UH: exit code
+    UH--&gt;&gt;JF: OK</code></pre>
+<hr />
+<h2 id="stage-3-linting">Stage 3: Linting</h2>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+
+    participant JF as Jenkinsfile&lt;br/&gt;(Orchestrator)
+    participant FS as File System
+    participant Bash as Bash Scripts
+
+    Note over JF: Stage: Linting
+
+    JF-&gt;&gt;FS: mkdir -p linting_results
+    JF-&gt;&gt;FS: cp .editorconfig
+    JF-&gt;&gt;Bash: sh Linting.bash
+    Bash--&gt;&gt;JF: exitCode
+
+    alt exitCode != 0
+        Note over JF: catchError - stage FAILURE
+    end</code></pre>
+<blockquote>
+<p><strong>Note</strong>: In DLX CD, linting results are <strong>not</strong> reported to Bitbucket (differs from CI)</p>
+</blockquote>
+<hr />
+<h2 id="stage-4-editmode-tests">Stage 4: EditMode Tests</h2>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+
+    participant JF as Jenkinsfile&lt;br/&gt;(Orchestrator)
+    participant FS as File System
+    participant UH as unityHelper
+    participant Unity as Unity CLI
+
+    Note over JF: Stage: EditMode Tests
+
+    JF-&gt;&gt;FS: mkdir -p test_results
+
+    JF-&gt;&gt;UH: runUnityStage('EditMode', errorMsg)
+    UH-&gt;&gt;UH: runUnityBatchMode('EditMode')
+    UH-&gt;&gt;Unity: unity -batchmode -nographics -testPlatform EditMode -runTests
+    Unity--&gt;&gt;UH: exit code + test_results/*.xml
+    UH--&gt;&gt;JF: OK/FAIL</code></pre>
+<blockquote>
+<p><strong>Note</strong>: In DLX CD, Code Coverage is <strong>not</strong> generated (CI_PIPELINE=false)</p>
+</blockquote>
+<hr />
+<h2 id="stage-5-playmode-tests">Stage 5: PlayMode Tests</h2>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+
+    participant JF as Jenkinsfile&lt;br/&gt;(Orchestrator)
+    participant UH as unityHelper
+    participant Unity as Unity CLI
+
+    Note over JF: Stage: PlayMode Tests
+
+    JF-&gt;&gt;UH: runUnityStage('PlayMode', errorMsg)
+    UH-&gt;&gt;UH: runUnityBatchMode('PlayMode')
+    UH-&gt;&gt;Unity: xvfb-run unity -batchmode -testPlatform PlayMode -runTests
+    Unity--&gt;&gt;UH: exit code + test_results/*.xml
+    UH--&gt;&gt;JF: OK/FAIL</code></pre>
+<hr />
+<h2 id="stage-6-build-project">Stage 6: Build Project</h2>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+
+    participant JF as Jenkinsfile&lt;br/&gt;(Orchestrator)
+    participant FS as File System
+    participant UH as unityHelper
+    participant Unity as Unity CLI
+
+    Note over JF: Stage: Build Project
+
+    JF-&gt;&gt;FS: mkdir -p Assets/Editor
+    JF-&gt;&gt;FS: mv Builder.cs Assets/Editor/
+
+    JF-&gt;&gt;UH: runUnityStage('Webgl', errorMsg)
+    UH-&gt;&gt;UH: runUnityBatchMode('Webgl')
+    UH-&gt;&gt;Unity: xvfb-run unity -batchmode -buildTarget WebGL -executeMethod Builder.BuildWebGL
+    Unity--&gt;&gt;UH: Builds/*
+    UH--&gt;&gt;JF: OK/FAIL</code></pre>
+<blockquote>
+<p><strong>Note</strong>: In DLX CD, Build Report is <strong>not</strong> sent to Bitbucket (differs from CI)</p>
+</blockquote>
+<hr />
+<h2 id="stage-7-deploy-build">Stage 7: Deploy Build</h2>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+
+    participant JF as Jenkinsfile&lt;br/&gt;(Orchestrator)
+    participant WS1 as LTI Web Server
+    participant WS2 as eConestoga DLX Server
+
+    Note over JF: Stage: Deploy Build
+    Note over JF: Jenkinsfile Direct Web Server Calls
+
+    Note over JF,WS1: Deploy to LTI Web Server
+    JF-&gt;&gt;WS1: ssh mkdir -p /var/www/html/{FOLDER_NAME}
+    JF-&gt;&gt;WS1: ssh chown vconadmin:vconadmin
+    JF-&gt;&gt;WS1: scp -rp Builds/*
+    JF-&gt;&gt;WS1: ssh bash UpdateBuildURL.sh
+    WS1--&gt;&gt;JF: OK
+
+    alt DLX_PROJECT_LIST.contains(PR_REPO_NAME)
+        Note over JF,WS2: Deploy to eConestoga DLX Server
+        JF-&gt;&gt;WS2: ssh mkdir -p /var/www/html/{FOLDER_NAME}
+        JF-&gt;&gt;WS2: ssh chown vconadmin:vconadmin
+        JF-&gt;&gt;WS2: scp -rp Builds/*
+        JF-&gt;&gt;WS2: ssh bash UpdateBuildURL.sh
+        WS2--&gt;&gt;JF: OK
+    end</code></pre>
+<hr />
+<h2 id="post-alwayssuccessfailureaborted">Post: always/success/failure/aborted</h2>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+
+    participant JF as Jenkinsfile&lt;br/&gt;(Orchestrator)
+    participant GH as generalHelper
+    participant Git as Git CLI
+    participant Python as Python Scripts
+    participant BB as Bitbucket API
+
+    Note over JF: Post: always/success/failure/aborted
+
+    Note over JF,GH: always block
+    JF-&gt;&gt;JF: currentBuild.description = PR_BRANCH
+    JF-&gt;&gt;GH: checkoutBranch(PROJECT_DIR, DESTINATION_BRANCH)
+    Note over GH: Domain: Git
+    GH-&gt;&gt;Git: git reset --hard
+    GH-&gt;&gt;Git: git clean -fd
+    GH-&gt;&gt;Git: git checkout {destination}
+    GH-&gt;&gt;Git: git reset --hard origin/{destination}
+    Git--&gt;&gt;GH: OK
+    GH--&gt;&gt;JF: OK
+
+    Note over JF,GH: success/failure/aborted
+    alt success
+        JF-&gt;&gt;GH: sendBuildStatus(workspace, 'SUCCESSFUL', commitHash, true)
+    else failure
+        JF-&gt;&gt;GH: sendBuildStatus(workspace, 'FAILED', commitHash, true)
+    else aborted
+        JF-&gt;&gt;GH: sendBuildStatus(workspace, 'STOPPED', commitHash, true)
+    end
+    Note over GH: Domain: Bitbucket
+    GH-&gt;&gt;Python: send_bitbucket_build_status.py -d
+    Python-&gt;&gt;BB: POST /statuses/build
+    BB--&gt;&gt;Python: OK
+    GH--&gt;&gt;JF: OK</code></pre>
+<hr />
+<h2 id="observations">Observations</h2>
+<h3 id="delegation-pattern">Delegation Pattern</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Example</th>
+<th style="text-align: center;">Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jenkinsfile → generalHelper → External</td>
+<td><code>sendBuildStatus</code> → Python → Bitbucket API</td>
+<td style="text-align: center;">3</td>
+</tr>
+<tr>
+<td>Jenkinsfile → unityHelper → External</td>
+<td><code>runUnityStage</code> → Unity CLI</td>
+<td style="text-align: center;">4</td>
+</tr>
+<tr>
+<td>Jenkinsfile → Git direct</td>
+<td><code>git clone</code>, <code>git checkout</code>, <code>git pull</code></td>
+<td style="text-align: center;">4</td>
+</tr>
+<tr>
+<td>Jenkinsfile → Web Server direct</td>
+<td><code>ssh</code>, <code>scp</code> in Deploy Build</td>
+<td style="text-align: center;">8</td>
+</tr>
+<tr>
+<td>Jenkinsfile → Bash direct</td>
+<td><code>Linting.bash</code></td>
+<td style="text-align: center;">1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ci-vs-cd-differences">CI vs CD Differences</h3>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>DLX CI</th>
+<th>DLX CD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linting report to Bitbucket</td>
+<td>✓</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>Code Coverage generation</td>
+<td>✓</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>Build report to Bitbucket</td>
+<td>✓</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>Test report to Bitbucket</td>
+<td>✓</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>Web Server deployment</td>
+<td>PR-Builds (reports)</td>
+<td>Production (builds)</td>
+</tr>
+<tr>
+<td>Git operations</td>
+<td>Via generalHelper</td>
+<td>Mixed (direct + helper)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="inconsistencies">Inconsistencies</h3>
+<table>
+<thead>
+<tr>
+<th>Issue</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mixed Git delegation</td>
+<td>CI uses <code>cloneOrUpdateRepo</code>, CD uses direct Git commands in Prepare WORKSPACE</td>
+</tr>
+<tr>
+<td>Mixed Web Server delegation</td>
+<td>Delete Merged Branch uses helper, Deploy Build uses direct calls</td>
+</tr>
+<tr>
+<td>No <code>initializeEnvironment</code></td>
+<td>CD calls <code>sendBuildStatus</code> directly instead of using mixed function</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><a href="../domain-mapping/">← Domain Mapping Summary</a> | <a href="../dlx-ci/">DLX CI →</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes", "navigation.top", "toc.integrate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

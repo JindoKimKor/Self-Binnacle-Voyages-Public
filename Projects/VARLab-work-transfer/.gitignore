@@ -1,0 +1,10 @@
+# Repos contain their own .git - not tracked by Self-Binnacle
+repos/
+portfolios/devops-jenkins-linux/4-layer-architecture-and-logger-system-integration-korean-version
+portfolios/devops-jenkins-windows/docker-web-application-build-optimization
+
+# Working documents (temporary)
+document-meta-overview.md
+
+# Archive folders
+**/archive/

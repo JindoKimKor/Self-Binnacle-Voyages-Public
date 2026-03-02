@@ -1,0 +1,96 @@
+site_name: Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns
+site_description: Jenkins refactoring, CI/CD architecture, technical debt, software smells, design patterns, 4-layer architecture, shared library
+site_author: Jindo Kim
+docs_dir: retrospective-analysis-from-5-monolithic-pipelines-to-4-layer-architecture
+site_dir: site
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: indigo
+    accent: indigo
+  features:
+    - navigation.indexes
+    - navigation.top
+    - toc.integrate
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - toc:
+      toc_depth: 2
+  - tables
+  - md_in_html
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+
+nav:
+  - Home: README.md
+  - Problem Analysis:
+      - Problem Analysis Overview: problem-analysis/problem-analysis-overview.md
+      - Detailed Analysis: problem-analysis/detailed-analysis.md
+      - Architecture Smells Analysis: problem-analysis/architecture-smells-analysis.md
+      - DRY Violation Analysis: problem-analysis/DRY-violation-analysis.md
+      - Pipeline Sequence Diagrams:
+          - Domain Mapping: problem-analysis/pipeline-sequence-diagrams/domain-mapping.md
+          - DLXJenkins CI: problem-analysis/pipeline-sequence-diagrams/dlx-ci.md
+          - DLXJenkins CD: problem-analysis/pipeline-sequence-diagrams/dlx-cd.md
+          - JsJenkins CI: problem-analysis/pipeline-sequence-diagrams/js-ci.md
+          - JsJenkins CD: problem-analysis/pipeline-sequence-diagrams/js-cd.md
+          - PipelineForJenkins CI: problem-analysis/pipeline-sequence-diagrams/jenkins-ci.md
+      - Per-File Analysis:
+          - generalHelper:
+              - SRP Violation Analysis: problem-analysis/01-generalHelper/01-srp-violation-analysis.md
+              - Software Smells Analysis: problem-analysis/01-generalHelper/02-software-smells-analysis.md
+              - Design Smells Analysis: problem-analysis/01-generalHelper/03-design-smells-symptoms.md
+          - jsHelper:
+              - SRP Violation Analysis: problem-analysis/02-jsHelper/01-srp-violation-analysis.md
+              - Software Smells Analysis: problem-analysis/02-jsHelper/02-software-smells-analysis.md
+              - Design Smells Analysis: problem-analysis/02-jsHelper/03-design-smells-symptoms.md
+          - unityHelper:
+              - SRP Violation Analysis: problem-analysis/03-unityHelper/01-srp-violation-analysis.md
+              - Software Smells Analysis: problem-analysis/03-unityHelper/02-software-smells-analysis.md
+              - Design Smells Analysis: problem-analysis/03-unityHelper/03-design-smells-symptoms.md
+          - DLXJenkins-Jenkinsfile:
+              - SRP Violation Analysis: problem-analysis/04-DLXJenkins-Jenkinsfile/01-srp-violation-analysis.md
+              - Software Smells Analysis: problem-analysis/04-DLXJenkins-Jenkinsfile/02-software-smells-analysis.md
+              - Design Smells Analysis: problem-analysis/04-DLXJenkins-Jenkinsfile/03-design-smells-symptoms.md
+          - DLXJenkins-JenkinsfileDeployment:
+              - SRP Violation Analysis: problem-analysis/05-DLXJenkins-JenkinsfileDeployment/01-srp-violation-analysis.md
+              - Software Smells Analysis: problem-analysis/05-DLXJenkins-JenkinsfileDeployment/02-software-smells-analysis.md
+              - Design Smells Analysis: problem-analysis/05-DLXJenkins-JenkinsfileDeployment/03-design-smells-symptoms.md
+          - JsJenkins-Jenkinsfile:
+              - SRP Violation Analysis: problem-analysis/06-JsJenkins-Jenkinsfile/01-srp-violation-analysis.md
+              - Software Smells Analysis: problem-analysis/06-JsJenkins-Jenkinsfile/02-software-smells-analysis.md
+              - Design Smells Analysis: problem-analysis/06-JsJenkins-Jenkinsfile/03-design-smells-symptoms.md
+          - JsJenkins-JenkinsfileDeployment:
+              - SRP Violation Analysis: problem-analysis/07-JsJenkins-JenkinsfileDeployment/01-srp-violation-analysis.md
+              - Software Smells Analysis: problem-analysis/07-JsJenkins-JenkinsfileDeployment/02-software-smells-analysis.md
+              - Design Smells Analysis: problem-analysis/07-JsJenkins-JenkinsfileDeployment/03-design-smells-symptoms.md
+          - PipelineForJenkins-Jenkinsfile:
+              - SRP Violation Analysis: problem-analysis/08-PipelineForJenkins-Jenkinsfile/01-srp-violation-analysis.md
+              - Software Smells Analysis: problem-analysis/08-PipelineForJenkins-Jenkinsfile/02-software-smells-analysis.md
+              - Design Smells Analysis: problem-analysis/08-PipelineForJenkins-Jenkinsfile/03-design-smells-symptoms.md
+  - Problem Solving:
+      - Solution Overview: problem-solving/solution-overview.md
+      - Solution by Layer: problem-solving/solution-by-layer.md
+      - Solution by Feature: problem-solving/solution-by-feature.md
+      - Logger System Design and Integration: problem-solving/logger-system-design-integration.md
+      - Domain-Driven Analysis: problem-solving/domain-driven-analysis.md
+      - Jenkins CPS Serialization Diagram: problem-solving/jenkins-cps-serialization-diagram.md
+      - Pull Request Documentation: problem-solving/pull-request-documentation.md
+      - Implementation Phases:
+          - Phase 0 - Global Trusted Shared Library Setup: problem-solving/phase-0-global-trusted-shared-library-setup/changelog.md
+          - Phase 1 - Shell Script Modularization and Initialization Stage: problem-solving/phase-1-shellscript-modularization-and-initialization-stage/changelog.md
+          - Phase 2 - 3-Level Logger System Implementation: problem-solving/phase-2-3-level-logger-system-implementation/changelog.md
+          - Phase 3 - Bitbucket API and Shell Library Integration: problem-solving/phase-3-bitbucket-api-and-shell-library-integration/changelog.md
+          - Phase 4 - Full Pipeline Refactoring and Stage Modularization: problem-solving/phase-4-full-pipeline-refactoring-and-stage-modularization/changelog.md

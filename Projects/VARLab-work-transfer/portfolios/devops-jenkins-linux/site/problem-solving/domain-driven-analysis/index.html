@@ -1,0 +1,3314 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Jenkins refactoring, CI/CD architecture, technical debt, software smells, design patterns, 4-layer architecture, shared library">
+      
+      
+        <meta name="author" content="Jindo Kim">
+      
+      
+      
+        <link rel="prev" href="../logger-system-design-integration/">
+      
+      
+        <link rel="next" href="../jenkins-cps-serialization-diagram/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Domain-Driven Analysis - Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ddd-patterns-in-jenkins-architecture" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns" class="md-header__button md-logo" aria-label="Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Domain-Driven Analysis
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns" class="md-nav__button md-logo" aria-label="Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Post-Refactoring Analysis - Intuitive Fixes to Industry Patterns
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Problem Analysis
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Problem Analysis
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/problem-analysis-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Problem Analysis Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/detailed-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detailed Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/architecture-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/DRY-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DRY Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline Sequence Diagrams
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pipeline Sequence Diagrams
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/pipeline-sequence-diagrams/domain-mapping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain Mapping
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/pipeline-sequence-diagrams/dlx-ci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DLXJenkins CI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/pipeline-sequence-diagrams/dlx-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DLXJenkins CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/pipeline-sequence-diagrams/js-ci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JsJenkins CI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/pipeline-sequence-diagrams/js-cd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JsJenkins CD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/pipeline-sequence-diagrams/jenkins-ci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PipelineForJenkins CI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Per-File Analysis
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Per-File Analysis
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_1" id="__nav_2_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    generalHelper
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    generalHelper
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/01-generalHelper/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/01-generalHelper/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/01-generalHelper/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_2" id="__nav_2_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    jsHelper
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    jsHelper
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/02-jsHelper/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/02-jsHelper/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/02-jsHelper/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_3" id="__nav_2_6_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    unityHelper
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    unityHelper
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/03-unityHelper/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/03-unityHelper/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/03-unityHelper/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_4" id="__nav_2_6_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DLXJenkins-Jenkinsfile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    DLXJenkins-Jenkinsfile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/04-DLXJenkins-Jenkinsfile/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/04-DLXJenkins-Jenkinsfile/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/04-DLXJenkins-Jenkinsfile/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_5" id="__nav_2_6_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DLXJenkins-JenkinsfileDeployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    DLXJenkins-JenkinsfileDeployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/05-DLXJenkins-JenkinsfileDeployment/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/05-DLXJenkins-JenkinsfileDeployment/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/05-DLXJenkins-JenkinsfileDeployment/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_6" id="__nav_2_6_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JsJenkins-Jenkinsfile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    JsJenkins-Jenkinsfile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/06-JsJenkins-Jenkinsfile/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/06-JsJenkins-Jenkinsfile/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/06-JsJenkins-Jenkinsfile/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_7" id="__nav_2_6_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JsJenkins-JenkinsfileDeployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    JsJenkins-JenkinsfileDeployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/07-JsJenkins-JenkinsfileDeployment/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/07-JsJenkins-JenkinsfileDeployment/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/07-JsJenkins-JenkinsfileDeployment/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_8" id="__nav_2_6_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PipelineForJenkins-Jenkinsfile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    PipelineForJenkins-Jenkinsfile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/08-PipelineForJenkins-Jenkinsfile/01-srp-violation-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SRP Violation Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/08-PipelineForJenkins-Jenkinsfile/02-software-smells-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../problem-analysis/08-PipelineForJenkins-Jenkinsfile/03-design-smells-symptoms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Smells Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Problem Solving
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Problem Solving
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../solution-overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solution Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../solution-by-layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solution by Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../solution-by-feature/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Solution by Feature
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logger-system-design-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Logger System Design and Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain-Driven Analysis
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domain-Driven Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-blocks-identified" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building Blocks Identified
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-tactical-patterns-were-not-applied" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Tactical Patterns Were Not Applied
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-strategic-design-patterns-were-not-applied" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Strategic Design Patterns Were Not Applied
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#before-vs-after-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before vs After Comparison
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../jenkins-cps-serialization-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jenkins CPS Serialization Diagram
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pull-request-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pull Request Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_8" id="__nav_3_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation Phases
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Implementation Phases
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../phase-0-global-trusted-shared-library-setup/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 0 - Global Trusted Shared Library Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../phase-1-shellscript-modularization-and-initialization-stage/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 1 - Shell Script Modularization and Initialization Stage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../phase-2-3-level-logger-system-implementation/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 2 - 3-Level Logger System Implementation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../phase-3-bitbucket-api-and-shell-library-integration/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 3 - Bitbucket API and Shell Library Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../phase-4-full-pipeline-refactoring-and-stage-modularization/changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase 4 - Full Pipeline Refactoring and Stage Modularization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="ddd-patterns-in-jenkins-architecture">DDD Patterns in Jenkins Architecture</h1>
+<p>This document analyzes the refactored Jenkins architecture and identifies similarities with <strong>DDD patterns</strong>, referencing Eric Evans' <em>Domain-Driven Design Reference</em> (2015).</p>
+<!--
+Source: Domain-Driven Design Reference, Eric Evans, 2015
+https://www.domainlanguage.com/ddd/reference/
+Licensed under Creative Commons Attribution 4.0 International License
+-->
+
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#background">Background</a></li>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#building-blocks-identified">Building Blocks Identified</a></li>
+<li><a href="#1-layered-architecture-">Layered Architecture</a></li>
+<li><a href="#2-modules-">Modules</a></li>
+<li><a href="#3-infrastructure-layer-facade-pattern">Infrastructure Layer (Facade Pattern)</a></li>
+<li><a href="#4-intention-revealing-interfaces-analysis">Intention-Revealing Interfaces (Analysis)</a></li>
+<li><a href="#why-tactical-patterns-were-not-applied">Why Tactical Patterns Were Not Applied</a></li>
+<li><a href="#why-strategic-design-patterns-were-not-applied">Why Strategic Design Patterns Were Not Applied</a></li>
+<li><a href="#before-vs-after-comparison">Before vs After Comparison</a></li>
+<li><a href="#summary">Summary</a></li>
+<li><a href="#interview-talking-point">Interview Talking Point</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+<hr />
+<h2 id="background">Background</h2>
+<p>While researching how to articulate the refactored structure, I discovered Domain-Driven Design. Analyzing my architecture, I found it aligns with several DDD organizational principles:</p>
+<ul>
+<li><strong>Layered Architecture</strong>: My 4-layer separation matched DDD's isolation principle</li>
+<li><strong>Modules</strong>: My domain-based libraries matched DDD's cohesive concept grouping</li>
+</ul>
+<h3 id="whats-missing-from-full-ddd">What's Missing from Full DDD</h3>
+<p>DDD's tactical patterns (Entities, Aggregates, Repositories) require <strong>stateful domain objects</strong> with identity and lifecycle. Jenkins pipelines are stateless: each execution is independent, no objects persist across runs. These patterns simply don't apply.</p>
+<p><strong>This is not a full DDD implementation.</strong> It's a domain-oriented architecture that shares organizational principles with DDD.</p>
+<hr />
+<h2 id="overview">Overview</h2>
+<h3 id="ddd-pattern-categories">DDD Pattern Categories</h3>
+<p>Domain-Driven Design (Eric Evans, 2003) organizes patterns into distinct categories:</p>
+<!--
+Source: DDD Reference, Table of Contents (p.ii-iii)
+- Part I: Putting the Model to Work (Bounded Context, Ubiquitous Language, etc.)
+- Part II: Building Blocks of a Model-Driven Design (Layered Architecture, Entities, Services, Modules, etc.)
+- Part III: Supple Design (Intention-Revealing Interfaces, etc.)
+- Part IV: Context Mapping for Strategic Design
+- Part V: Distillation for Strategic Design (Core Domain, Generic Subdomains)
+- Part VI: Large-scale Structure for Strategic Design
+-->
+
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Patterns</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Building Blocks</strong></td>
+<td>Layered Architecture, Modules, Services, Entities, Value Objects</td>
+<td>Code-level organization</td>
+</tr>
+<tr>
+<td><strong>Strategic Design</strong></td>
+<td>Bounded Contexts, Context Mapping, Core Domain, Subdomains</td>
+<td>System-level organization</td>
+</tr>
+<tr>
+<td><strong>Supple Design</strong></td>
+<td>Intention-Revealing Interfaces, Side-Effect-Free Functions</td>
+<td>Design quality</td>
+</tr>
+</tbody>
+</table>
+<h3 id="patterns-identified-in-this-architecture">Patterns Identified in This Architecture</h3>
+<table>
+<thead>
+<tr>
+<th>DDD Pattern</th>
+<th>Category</th>
+<th>Alignment</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Layered Architecture</strong></td>
+<td>Building Blocks</td>
+<td>✓ Applied</td>
+<td>4-layer separation of concerns</td>
+</tr>
+<tr>
+<td><strong>Modules</strong></td>
+<td>Building Blocks</td>
+<td>✓ Applied</td>
+<td>Git/Shell/SSH libraries as cohesive units</td>
+</tr>
+<tr>
+<td><strong>Infrastructure Service</strong></td>
+<td>Building Blocks</td>
+<td>Partial</td>
+<td>Concept exists, implemented as GoF Facade</td>
+</tr>
+<tr>
+<td><strong>Intention-Revealing Interfaces</strong></td>
+<td>Supple Design</td>
+<td>✗ No</td>
+<td>Names expose implementation (git commands)</td>
+</tr>
+<tr>
+<td><strong>Entities/Aggregates</strong></td>
+<td>Building Blocks</td>
+<td>✗ No</td>
+<td>Not applicable to stateless pipeline scripts</td>
+</tr>
+<tr>
+<td><strong>Domain Services</strong></td>
+<td>Building Blocks</td>
+<td>✗ No</td>
+<td>No domain logic to coordinate</td>
+</tr>
+<tr>
+<td><strong>Bounded Contexts</strong></td>
+<td>Strategic Design</td>
+<td>✗ No</td>
+<td>Single team, single codebase</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="building-blocks-identified">Building Blocks Identified</h2>
+<h3 id="1-layered-architecture">1. Layered Architecture ✓</h3>
+<!--
+Source: DDD Reference, p.10 - Layered Architecture (Part II: Building Blocks)
+
+"Isolate the expression of the domain model and the business logic, and eliminate any
+dependency on infrastructure, user interface, or even application logic that is not business
+logic. Partition a complex program into layers. Develop a design within each layer that is
+cohesive and that depends only on the layers below."
+
+"The key goal here is isolation."
+-->
+
+<p>The architecture implements a <strong>4-layer structure</strong> that aligns with DDD's Layered Architecture pattern:</p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────────────┐
+│                      LAYER 1: Entry Point                          │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  │
+│  │   DLXJenkins     │  │    JsJenkins     │  │  PipelineFor     │  │
+│  │  [Unity Entry]   │  │   [JS Entry]     │  │    Jenkins       │  │
+│  └──────────────────┘  └──────────────────┘  └──────────────────┘  │
+└─────────────────────────────────────────────────────────────────────┘
+                                   │
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                 LAYER 2: Orchestration (vars/)                     │
+│  ┌─────────────────────────┐  ┌─────────────────────────┐          │
+│  │   stageLintUnity        │  │  stageInitialization    │          │
+│  │   stageUnityExecution   │  │  stageDeployBuild       │          │
+│  └─────────────────────────┘  └─────────────────────────┘          │
+└─────────────────────────────────────────────────────────────────────┘
+                                   │
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                 LAYER 3: Infrastructure                            │
+│  Physical: src/service/         Physical: vars/ (CPS Constraint)   │
+│  ┌─────────────────────────┐  ┌─────────────────────────┐          │
+│  │   BitbucketApiService   │  │   shellScriptHelper     │          │
+│  │  [HTTP Communication]   │  │  [Facade: Execution +   │          │
+│  └─────────────────────────┘  │   Logging]              │          │
+│                               └─────────────────────────┘          │
+│                               ┌─────────────────────────┐          │
+│                               │  bitbucketApiHelper     │          │
+│                               │  [Facade: Credentials + │          │
+│                               │   API orchestration]    │          │
+│                               └─────────────────────────┘          │
+└─────────────────────────────────────────────────────────────────────┘
+                                   │
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                 LAYER 4: Modules                                   │
+│  Physical: src/utils/                                               │
+│  ┌───────────────────┐ ┌───────────────────┐ ┌───────────────────┐ │
+│  │    GitLibrary     │ │   ShellLibrary    │ │  SSHShellLibrary  │ │
+│  │   23 operations   │ │   15 operations   │ │    8 operations   │ │
+│  └───────────────────┘ └───────────────────┘ └───────────────────┘ │
+│  Physical: vars/ (CPS Constraint)                                   │
+│  ┌───────────────────────────────────────────────────────────────┐ │
+│  │ bitbucketApiLibrary - API request metadata definitions        │ │
+│  └───────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<p><strong>Key isolation achieved:</strong>
+- Entry points depend only on Orchestration
+- Orchestration depends only on Infrastructure
+- Infrastructure depends only on Modules
+- Modules have no upward dependencies</p>
+<details>
+<summary><strong>Jenkins CPS Constraint (Click to expand)</strong></summary>
+
+Jenkins Pipeline applies CPS (Continuation-Passing Style) transformation for fault tolerance. This creates two constraints:
+
+| Constraint | Description |
+|------------|-------------|
+| **Serializable** | Class fields must be serializable for state persistence across restarts |
+| **Pipeline Step Context** | `sh`, `echo`, `withCredentials` must be called from `vars/` (CPS context) |
+
+**Pattern: Indirect call via vars/**
+
+<div class="highlight"><pre><span></span><code><span class="c1">// src/HttpApiService.groovy</span>
+<span class="n">logger</span><span class="o">.</span><span class="na">stepProcessing</span><span class="o">(</span><span class="s2">&quot;msg&quot;</span><span class="o">)</span><span class="w">  </span><span class="c1">// ✓ OK - vars/에서 echo 실행</span>
+<span class="n">jenkinsfile</span><span class="o">.</span><span class="na">sh</span><span class="o">(</span><span class="s2">&quot;...&quot;</span><span class="o">)</span><span class="w">         </span><span class="c1">// ❌ 안 됨 - 직접 호출</span>
+</code></pre></div>
+
+| Component | Location | Reason |
+|-----------|----------|--------|
+| **HttpApiService** | src/ | Pure Java (Apache HttpClient). logger는 vars/ 통해 간접 호출 |
+| **shellScriptHelper** | vars/ | `sh()` 직접 호출 |
+| **logger** | vars/ | `echo` 직접 호출 |
+
+> 상세 설명: [CPS Serialization Diagram](cps-serialization-diagram.md)
+
+</details>
+
+<hr />
+<h3 id="2-modules">2. Modules ✓</h3>
+<!--
+Source: DDD Reference, p.15 - Modules (Part II: Building Blocks)
+
+"Choose modules that tell the story of the system and contain a cohesive set of concepts.
+Give the modules names that become part of the ubiquitous language. Modules are part of
+the model and their names should reflect insight into the domain."
+
+"This often yields low coupling between modules, but if it doesn't look for a way to change
+the model to disentangle the concepts, or an overlooked concept that might be the basis of
+a module that would bring the elements together in a meaningful way. Seek low coupling
+in the sense of concepts that can be understood and reasoned about independently."
+
+Note: Modules are also known as "Packages" (p.15)
+-->
+
+<p>Each utility library functions as a <strong>Module</strong> with characteristics that align with DDD's definition:</p>
+<ul>
+<li><strong>Cohesive concepts</strong>: Related operations grouped together</li>
+<li><strong>Clear naming</strong>: Names reflect domain insight (Git operations, Shell operations, API operations)</li>
+<li><strong>Low coupling</strong>: Can be understood independently</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Location</th>
+<th>Operations</th>
+<th>Cohesive Concept</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GitLibrary</strong></td>
+<td>src/utils/</td>
+<td>23</td>
+<td>All version control operations</td>
+</tr>
+<tr>
+<td><strong>ShellLibrary</strong></td>
+<td>src/utils/</td>
+<td>15</td>
+<td>Local system execution</td>
+</tr>
+<tr>
+<td><strong>SSHShellLibrary</strong></td>
+<td>src/utils/</td>
+<td>8</td>
+<td>Remote server operations</td>
+</tr>
+<tr>
+<td><strong>bitbucketApiLibrary</strong></td>
+<td>vars/ (CPS)</td>
+<td>8</td>
+<td>Bitbucket API request definitions</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example: GitLibrary as a Module</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kd">class</span><span class="w"> </span><span class="nc">GitLibrary</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="c1">// Cohesive set of version control operations</span>
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Closure</span><span class="w"> </span><span class="n">CheckoutBranch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">branchName</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">        </span><span class="o">[</span>
+<span class="w">            </span><span class="nl">script:</span><span class="w"> </span><span class="s2">&quot;git checkout ${branchName}&quot;</span><span class="o">,</span>
+<span class="w">            </span><span class="nl">label:</span><span class="w"> </span><span class="s2">&quot;Checkout branch &#39;${branchName}&#39;&quot;</span><span class="o">,</span>
+<span class="w">            </span><span class="nl">returnStdout:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">        </span><span class="o">]</span>
+<span class="w">    </span><span class="o">}</span>
+
+<span class="w">    </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Closure</span><span class="w"> </span><span class="n">MergeOriginBranch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">branchToMerge</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">        </span><span class="o">[</span>
+<span class="w">            </span><span class="nl">script:</span><span class="w"> </span><span class="s2">&quot;git merge origin/${branchToMerge}&quot;</span><span class="o">,</span>
+<span class="w">            </span><span class="nl">label:</span><span class="w"> </span><span class="s2">&quot;Merge remote branch &#39;origin/${branchToMerge}&#39; into current HEAD&quot;</span><span class="o">,</span>
+<span class="w">            </span><span class="nl">returnStatus:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">        </span><span class="o">]</span>
+<span class="w">    </span><span class="o">}</span>
+
+<span class="w">    </span><span class="c1">// ... 23 operations total</span>
+<span class="o">}</span>
+</code></pre></div>
+<p><strong>Module characteristics achieved:</strong>
+- <strong>High cohesion</strong>: Only git-related operations
+- <strong>Encapsulation</strong>: Internal helpers prefixed with <code>_</code>
+- <strong>Domain vocabulary</strong>: <code>checkout</code>, <code>branch</code>, <code>merge</code>, <code>tag</code></p>
+<hr />
+<h3 id="3-infrastructure-layer-facade-pattern">3. Infrastructure Layer (Facade Pattern)</h3>
+<p>Layer 3 components are implemented using the <strong>Facade pattern</strong> from GoF design patterns, rather than DDD Services. This distinction is important:</p>
+<p><strong>DDD Service definition</strong> (from DDD Reference, p.14):</p>
+<blockquote>
+<p>"When a significant process or transformation in the domain is not a natural responsibility of an entity or value object, add an operation to the model as a standalone interface declared as a service."</p>
+</blockquote>
+<p>Since this architecture has no Entities or Value Objects (stateless environment), the DDD Service pattern doesn't directly apply. Instead, these components serve as <strong>technical facades</strong> that simplify complex infrastructure operations:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Pattern</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BitbucketApiService</strong></td>
+<td>HTTP Client Wrapper</td>
+<td>Encapsulates Apache HttpClient for API communication</td>
+</tr>
+<tr>
+<td><strong>shellScriptHelper</strong></td>
+<td>Facade</td>
+<td>Combines Library closure execution + Logger integration</td>
+</tr>
+<tr>
+<td><strong>bitbucketApiHelper</strong></td>
+<td>Facade</td>
+<td>Combines credentials management + API service orchestration</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example: shellScriptHelper as Facade</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Simplifies: Library closure + validation + execution + logging</span>
+<span class="kt">def</span><span class="w"> </span><span class="nf">call</span><span class="o">(</span><span class="n">Closure</span><span class="w"> </span><span class="n">shellScriptClosure</span><span class="o">,</span><span class="w"> </span><span class="n">List</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">[])</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="n">Map</span><span class="w"> </span><span class="n">shMap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">shellScriptClosure</span><span class="o">(*</span><span class="n">args</span><span class="o">)</span>
+<span class="w">    </span><span class="n">Map</span><span class="w"> </span><span class="n">validatedShMap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">validateShMap</span><span class="o">(</span><span class="n">shMap</span><span class="o">)</span>
+<span class="w">    </span><span class="n">logger</span><span class="o">.</span><span class="na">stepStart</span><span class="o">(</span><span class="s2">&quot;${validatedShMap.label}&quot;</span><span class="o">)</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">(</span><span class="n">validatedShMap</span><span class="o">.</span><span class="na">returnStatus</span><span class="o">)</span><span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">executeReturnStatus</span><span class="o">(</span><span class="n">validatedShMap</span><span class="o">)</span>
+<span class="w">    </span><span class="o">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="o">(</span><span class="n">validatedShMap</span><span class="o">.</span><span class="na">returnStdout</span><span class="o">)</span><span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">executeReturnStdout</span><span class="o">(</span><span class="n">validatedShMap</span><span class="o">)</span>
+<span class="w">    </span><span class="o">}</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="o">}</span>
+</code></pre></div>
+<p><strong>Example: bitbucketApiHelper as Facade</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Simplifies: credentials + API service + error handling</span>
+<span class="kt">def</span><span class="w"> </span><span class="nf">call</span><span class="o">(</span><span class="n">Map</span><span class="w"> </span><span class="n">bitbucketApiMap</span><span class="o">)</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="n">BitbucketApiService</span><span class="w"> </span><span class="n">bitbucketApiService</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">BitbucketApiService</span><span class="o">(</span><span class="k">this</span><span class="o">)</span>
+
+<span class="w">    </span><span class="n">withCredentials</span><span class="o">([</span><span class="n">string</span><span class="o">(</span><span class="nl">credentialsId:</span><span class="w"> </span><span class="s1">&#39;bitbucket-access-token&#39;</span><span class="o">,</span><span class="w"> </span><span class="nl">variable:</span><span class="w"> </span><span class="s1">&#39;token&#39;</span><span class="o">)])</span><span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="o">(</span><span class="n">bitbucketApiMap</span><span class="o">.</span><span class="na">method</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s1">&#39;POST&#39;</span><span class="o">)</span><span class="w"> </span><span class="o">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">bitbucketApiService</span><span class="o">.</span><span class="na">post</span><span class="o">(</span><span class="n">bitbucketApiMap</span><span class="o">.</span><span class="na">apiUrlString</span><span class="o">,</span><span class="w"> </span><span class="n">bitbucketApiMap</span><span class="o">.</span><span class="na">requestBody</span><span class="o">,</span><span class="w"> </span><span class="n">token</span><span class="o">)</span>
+<span class="w">        </span><span class="o">}</span>
+<span class="w">        </span><span class="c1">// ...</span>
+<span class="w">    </span><span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<hr />
+<h3 id="4-intention-revealing-interfaces-analysis">4. Intention-Revealing Interfaces (Analysis)</h3>
+<!--
+Source: DDD Reference, p.20 - Intention-Revealing Interfaces (Part III: Supple Design)
+
+"Name classes and operations to describe their effect and purpose, without reference to the
+means by which they do what they promise. This relieves the client developer of the need
+to understand the internals. These names should conform to the ubiquitous language so
+that team members can quickly infer their meaning."
+-->
+
+<p><strong>DDD Definition:</strong> Names should describe effect and purpose, <strong>without reference to the means</strong> by which they do what they promise.</p>
+<p><strong>Analysis of current naming:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Operation Name</th>
+<th>What It Reveals</th>
+<th>Issue</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GitLibrary.CheckoutBranch</code></td>
+<td><code>git checkout</code> command</td>
+<td>Exposes implementation</td>
+</tr>
+<tr>
+<td><code>GitLibrary.MergeOriginBranch</code></td>
+<td><code>git merge origin/</code> command</td>
+<td>Exposes implementation</td>
+</tr>
+<tr>
+<td><code>GitLibrary.ResetHardHead</code></td>
+<td><code>git reset --hard</code> command</td>
+<td>Exposes implementation</td>
+</tr>
+<tr>
+<td><code>ShellLibrary.PrintJenkinsEnv</code></td>
+<td>Prints environment</td>
+<td>Descriptive, but technical</td>
+</tr>
+<tr>
+<td><code>SSHShellLibrary.CopyBuildToHostServer</code></td>
+<td>SCP operation</td>
+<td>Exposes implementation</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why this doesn't meet DDD criteria:</strong></p>
+<p>The current names directly expose the underlying git/shell commands rather than describing the business intent. True Intention-Revealing names would be:</p>
+<table>
+<thead>
+<tr>
+<th>Current</th>
+<th>Intention-Revealing Alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CheckoutBranch</code></td>
+<td><code>SwitchToBranch</code> or <code>ActivateBranch</code></td>
+</tr>
+<tr>
+<td><code>MergeOriginBranch</code></td>
+<td><code>IntegrateRemoteChanges</code></td>
+</tr>
+<tr>
+<td><code>ResetHardHead</code></td>
+<td><code>DiscardAllLocalChanges</code></td>
+</tr>
+<tr>
+<td><code>CopyBuildToHostServer</code></td>
+<td><code>DeployBuildArtifacts</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conclusion:</strong> The current naming is <strong>descriptive</strong> but not <strong>intention-revealing</strong> by DDD standards. Names follow git/shell command conventions rather than domain language.</p>
+<hr />
+<h2 id="why-tactical-patterns-were-not-applied">Why Tactical Patterns Were Not Applied</h2>
+<!--
+Source: DDD Reference, p.11 - Entities (Part II: Building Blocks)
+
+"When an object is distinguished by its identity, rather than its attributes, make this primary
+to its definition in the model. Keep the class definition simple and focused on life cycle
+continuity and identity."
+
+Source: DDD Reference, p.16 - Aggregates (Part II: Building Blocks)
+
+"Cluster the entities and value objects into aggregates and define boundaries around each.
+Choose one entity to be the root of each aggregate, and allow external objects to hold
+references to the root only."
+-->
+
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Description</th>
+<th>Why Not Applicable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Entities</strong></td>
+<td>Objects with identity and lifecycle</td>
+<td>Pipeline scripts are stateless</td>
+</tr>
+<tr>
+<td><strong>Value Objects</strong></td>
+<td>Immutable objects defined by attributes</td>
+<td>No complex domain objects needed</td>
+</tr>
+<tr>
+<td><strong>Aggregates</strong></td>
+<td>Clusters with consistency boundaries</td>
+<td>No persistent object relationships</td>
+</tr>
+<tr>
+<td><strong>Repositories</strong></td>
+<td>Collection-like access to aggregates</td>
+<td>No persistent storage of domain objects</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Stateless vs Stateful:</strong></p>
+<p>DDD tactical patterns assume <strong>stateful</strong> domain objects where:
+- Objects have identity that persists across operations
+- State changes are tracked and managed
+- Previous state influences next behavior</p>
+<p>Jenkins pipelines are <strong>stateless</strong>:
+- Each execution is independent
+- No objects persist across pipeline runs
+- External systems (Bitbucket, Azure) manage state</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Stateless: Each call is independent, no state tracking</span>
+<span class="n">bitbucketApiHelper</span><span class="o">(</span>
+<span class="w">    </span><span class="n">bitbucketApiLibrary</span><span class="o">.</span><span class="na">createBuildStatusForCommit</span><span class="o">(</span><span class="n">Status</span><span class="o">.</span><span class="na">COMMIT_STATUS</span><span class="o">.</span><span class="na">SUCCESSFUL</span><span class="o">,</span><span class="w"> </span><span class="s1">&#39;✅ Success&#39;</span><span class="o">)</span>
+<span class="o">)</span>
+
+<span class="c1">// Stateful would require:</span>
+<span class="kd">class</span><span class="w"> </span><span class="nc">PullRequest</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="n">PRId</span><span class="w"> </span><span class="n">id</span>
+<span class="w">    </span><span class="n">Status</span><span class="w"> </span><span class="n">previousStatus</span>
+
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">updateStatus</span><span class="o">(</span><span class="n">newStatus</span><span class="o">)</span><span class="w"> </span><span class="o">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="o">(</span><span class="n">previousStatus</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">FAILED</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">newStatus</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">SUCCESS</span><span class="o">)</span><span class="w"> </span><span class="o">{</span>
+<span class="w">            </span><span class="n">notifyRecovery</span><span class="o">()</span><span class="w">  </span><span class="c1">// Behavior depends on previous state</span>
+<span class="w">        </span><span class="o">}</span>
+<span class="w">        </span><span class="n">previousStatus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">newStatus</span>
+<span class="w">    </span><span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<hr />
+<h2 id="why-strategic-design-patterns-were-not-applied">Why Strategic Design Patterns Were Not Applied</h2>
+<h3 id="bounded-context">Bounded Context</h3>
+<!--
+Source: DDD Reference, p.2 - Bounded Context (Part I: Putting the Model to Work)
+
+"Multiple models are in play on any large project. They emerge for many reasons. Two
+subsystems commonly serve very different user communities, with different jobs, where
+different models may be useful. Teams working independently may solve the same problem
+in different ways through lack of communication."
+
+"Explicitly define the context within which a model applies. Explicitly set boundaries in
+terms of team organization, usage within specific parts of the application, and physical
+manifestations such as code bases and database schemas."
+-->
+
+<p><strong>Bounded Context</strong> applies when:
+- Multiple teams with different models
+- Separate applications or services
+- Different codebases, databases</p>
+<p><strong>Not applicable here:</strong>
+- Single team maintains all code
+- Single codebase (Jenkins shared library)
+- No need for model translation between contexts</p>
+<p><strong>Note:</strong> The utility libraries (Git, Shell, SSH) are <strong>Modules</strong>, not Bounded Contexts. They share the same team, codebase, and ubiquitous language.</p>
+<hr />
+<h2 id="before-vs-after-comparison">Before vs After Comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Before (74fc356)</th>
+<th>After (ff74ac8)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Structure</strong></td>
+<td>Flat <code>groovy/</code> folder</td>
+<td>4-layer <code>sharedLibraries/</code></td>
+</tr>
+<tr>
+<td><strong>Git operations</strong></td>
+<td>Mixed in generalHelper</td>
+<td>Separated to GitLibrary (23 ops)</td>
+</tr>
+<tr>
+<td><strong>Shell operations</strong></td>
+<td>Mixed in generalHelper</td>
+<td>Separated to ShellLibrary (15 ops)</td>
+</tr>
+<tr>
+<td><strong>SSH operations</strong></td>
+<td>Mixed in generalHelper</td>
+<td>Separated to SSHShellLibrary (8 ops)</td>
+</tr>
+<tr>
+<td><strong>Stage logic</strong></td>
+<td>Directly in Jenkinsfile</td>
+<td>Extracted to vars/stage*.groovy</td>
+</tr>
+<tr>
+<td><strong>Logging</strong></td>
+<td>Ad-hoc echo statements</td>
+<td>Centralized logger.groovy</td>
+</tr>
+<tr>
+<td><strong>API calls</strong></td>
+<td>Python script dependency</td>
+<td>Native Groovy BitbucketApiService</td>
+</tr>
+<tr>
+<td><strong>Commits</strong></td>
+<td>89</td>
+<td>308</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="summary">Summary</h2>
+<h3 id="patterns-applied">Patterns Applied</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Category</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Layered Architecture</strong></td>
+<td>DDD Building Blocks</td>
+<td>4-layer: Entry → Orchestration → Infrastructure → Module</td>
+</tr>
+<tr>
+<td><strong>Modules</strong></td>
+<td>DDD Building Blocks</td>
+<td>GitLibrary, ShellLibrary, SSHShellLibrary, bitbucketApiLibrary</td>
+</tr>
+</tbody>
+</table>
+<h3 id="patterns-partially-aligned">Patterns Partially Aligned</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Category</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Infrastructure Service</strong></td>
+<td>DDD Building Blocks</td>
+<td>Concept exists, implemented as GoF Facade pattern</td>
+</tr>
+</tbody>
+</table>
+<h3 id="patterns-not-applied">Patterns Not Applied</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Category</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Intention-Revealing Interfaces</strong></td>
+<td>DDD Supple Design</td>
+<td>Names expose implementation (git commands)</td>
+</tr>
+<tr>
+<td><strong>Entities, Aggregates</strong></td>
+<td>DDD Building Blocks</td>
+<td>Stateless pipeline environment</td>
+</tr>
+<tr>
+<td><strong>Domain Services</strong></td>
+<td>DDD Building Blocks</td>
+<td>No domain logic requiring coordination between Entities/Value Objects</td>
+</tr>
+<tr>
+<td><strong>Bounded Contexts</strong></td>
+<td>DDD Strategic Design</td>
+<td>Single team, single codebase</td>
+</tr>
+<tr>
+<td><strong>Context Mapping</strong></td>
+<td>DDD Strategic Design</td>
+<td>No multiple contexts to integrate</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<!--
+## Interview Talking Point
+
+**Q: Why did you use "domain-driven" in your resume?**
+
+> "The original purpose of DDD is to design complex domain logic with domain experts and developers communicating in the same language, centered around a domain model.
+>
+> In my case, it wasn't to that level. I used 'domain-driven' to mean that I separated the previously mixed code by functional domains: Git operations, Shell scripting, Bitbucket API, and Secure Shell operations.
+>
+> After the refactoring, I analyzed it against Eric Evans' DDD. I found similarities with some organizational principles like Layered Architecture and Modules, but I didn't apply DDD as a whole."
+
+**Q: What is DDD's main purpose?**
+
+> "DDD's core purpose is handling complex business domains by having developers and domain experts communicate using a Ubiquitous Language, with the domain model directly reflected in code.
+>
+> Jenkins pipelines don't really fit this - they're stateless, mostly external system calls, no complex domain logic. What I did was domain-based code organization, not full DDD implementation."
+
+**Q: What about Intention-Revealing Interfaces?**
+
+> "That's one I could have applied but didn't. I used implementation names like git commands instead of domain-intent names.
+>
+> If I had done this, it would have been closer to DDD's core concept of Ubiquitous Language - where the code reflects domain intent rather than implementation details."
+-->
+
+<h2 id="references">References</h2>
+<ul>
+<li>Evans, Eric. <em>Domain-Driven Design: Tackling Complexity in the Heart of Software</em>. Addison-Wesley, 2003.</li>
+<li>Evans, Eric. <em>Domain-Driven Design Reference</em>. Domain Language, Inc., 2015. (CC BY 4.0)</li>
+<li>Gamma, Erich, et al. <em>Design Patterns: Elements of Reusable Object-Oriented Software</em>. Addison-Wesley, 1994. (Facade pattern)</li>
+<li><a href="https://martinfowler.com/bliki/BoundedContext.html">Martin Fowler - Bounded Context</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.indexes", "navigation.top", "toc.integrate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

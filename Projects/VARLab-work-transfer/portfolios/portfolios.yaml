@@ -1,0 +1,32 @@
+portfolios:
+  - path: devops-jenkins-linux/retrospective-analysis-from-5-monolithic-pipelines-to-4-layer-architecture/README.md
+    url: "https://jindokimkor.github.io/Self-Binnacle/"
+    status: complete
+    title: "Retrospective Analysis: From 5 Monolithic pipeline to 4-Layer Pipeline"
+    labels:
+      What I did: "Transformed 5 monolithic pipelines (37% duplication) into 4-layer architecture with centralized libraries"
+      How it emerged: "Felt the pain → organized by domain naturally → patterns emerged"
+      Post-analysis: "Mapped my solution to industry concepts (Software Smells, DDD patterns, GoF Design Patterns)"
+      Documentation: "Problem analysis, pattern identification, architecture rationale"
+
+  - path: devops-jenkins-linux/94.88-percent-cost-reduction/README.md
+    url: "https://github.com/JindoKimKor/Self-Binnacle/blob/main/Voyages/Projects/VARLab-work-transfer/portfolios/devops-jenkins-linux/94.88-percent-cost-reduction/README.md"
+    status: complete
+    title: "94.88% CI/CD Infrastructure Cost Reduction"
+    labels:
+      Context: "Unity CI/CD build environment isolation at VARLab"
+      Problem: "Unity Editor 100% CPU usage → server crashes on concurrent builds"
+      Solution: "Azure Batch + Spot VMs for on-demand execution"
+      Result: "94.88% cost reduction ($618 → $32 for 56 days)"
+      Keywords: "Azure Batch, Spot VMs, Docker, Unity, Cost Optimization"
+
+  - path: devops-jenkins-windows/stabilized-crashed-build-server/README.md
+    url: "https://github.com/JindoKimKor/Self-Binnacle/blob/main/Voyages/Projects/VARLab-work-transfer/portfolios/devops-jenkins-windows/stabilized-crashed-build-server/README.md"
+    status: complete
+    title: "Stabilized Crashed Unity Build Server"
+    labels:
+      Context: "Unity CI/CD server stability crisis (June 2024)"
+      Problem: "VM crashes when 2-3 pipelines run simultaneously"
+      Solution: "Trade-off approach - shared project files + optimization skip"
+      Result: "Server stabilized, concurrent pipelines supported"
+      Byproduct: "80% faster builds, 90% CPU reduction"
