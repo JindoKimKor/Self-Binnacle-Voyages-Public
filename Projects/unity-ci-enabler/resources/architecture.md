@@ -59,19 +59,21 @@ Based on VARLab's serverless approach (94.88% cost reduction), democratized for 
   - Azure → Azure Key Vault
   - AWS   → AWS Secrets Manager
   - GCP   → GCP Secret Manager
-  (Note: license is NOT stored in GitHub Secrets — only cloud credentials and CI_FUNCTION_URL go there)
-    ↓
-[VM captured as image → Image Gallery]
-  Azure → Shared Image Gallery
-  AWS   → AMI (Amazon Machine Image)
-  GCP   → Custom Image
+  (Note: license is NOT stored in GitHub Secrets — only cloud credentials go there)
     ↓
 [Cleanup on VM]
   - Unity Hub deleted
   - License file deleted from VM
     ↓
+[VM captured as image → Image Gallery]
+  Azure → Shared Image Gallery (specialized, not generalized)
+  AWS   → AMI (Amazon Machine Image)
+  GCP   → Custom Image
+  (specialized = machine ID preserved in image)
+  (image contains: Docker + game-ci + noVNC + Git — no Unity Hub, no license)
+    ↓
 [Output]
-  - Image stored in Gallery (game-ci pre-loaded)
+  - Image stored in Gallery (game-ci pre-loaded, machine ID baked in, clean — no credentials)
   - License stored in Cloud Secret Manager (Azure Key Vault / AWS Secrets Manager / GCP Secret Manager)
   - Original VM can be deleted
 ```
@@ -80,6 +82,8 @@ Based on VARLab's serverless approach (94.88% cost reduction), democratized for 
 - This step runs once per Unity version or platform change
 - The user must interact manually during the license activation phase (TBD: can this be automated?)
 - After cleanup, the VM has no credentials — only the game-ci image remains
+- **Specialized image**: machine ID is preserved → every build node spun from this image has the same machine ID → Unity license remains valid without re-activation
+- **Re-activation**: if license expires or fails, Step 1 is re-triggered with the same image → same machine ID → Unity recognizes it as the same machine
 
 ---
 
@@ -138,7 +142,7 @@ Based on VARLab's serverless approach (94.88% cost reduction), democratized for 
 
 **Notes:**
 - Build node is ephemeral — spun up per build, torn down after
-- License machine ID binding: TBD (needs verification with game-ci container behavior)
+- License machine ID binding: resolved via specialized image — all build nodes share the same machine ID
 - Artifact storage: Azure Blob Storage / AWS S3 / GCP GCS
 - GitHub Secrets required: cloud credentials only (NOT the Unity license — that lives in Cloud Secret Manager)
 
@@ -239,6 +243,7 @@ Steps that cannot be automated:
 
 - [x] **Entry point**: GitHub App webhook → Serverless Function (plug-and-play, no DevOps knowledge required)
 - [x] **Unity License**: Stored in Cloud Secret Manager (Azure Key Vault); written to build node at runtime
+- [ ] **License re-activation trigger**: How does Step 2 failure signal Step 1 re-trigger? (TBD)
 - [x] **Artifact storage**: Azure Blob Storage / AWS S3 / GCP GCS
 - [ ] **Multi-cloud config**: Single config file approach vs. per-provider packages?
 - [ ] **Terraform state**: Where is state stored? (local vs. remote backend)
