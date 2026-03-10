@@ -1,0 +1,11 @@
+=== Command ===
+az functionapp identity assign --name unity-ci-func --resource-group unity-ci-enabler-rg
+
+=== Output ===
+{
+  "principalId": "86682b03-27c2-4001-abef-5e4fe3b05c84",
+  "tenantId": "4ddd393a-e98a-4404-841f-c4becdd925a5",
+  "type": "SystemAssigned",
+  "userAssignedIdentities": null
+}
+

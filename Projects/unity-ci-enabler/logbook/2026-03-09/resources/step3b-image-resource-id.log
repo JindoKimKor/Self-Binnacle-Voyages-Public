@@ -1,0 +1,53 @@
+=== Command ===
+az functionapp config appsettings set --name unity-ci-func --resource-group unity-ci-enabler-rg --settings IMAGE_RESOURCE_ID=/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.Compute/galleries/unity_ci_gallery/images/unity-ci-build-image/versions/latest
+
+=== Output ===
+WARNING: Could not detect runtime. To configure linuxFxVersion, please visit https://aka.ms/linuxFxVersion
+[
+  {
+    "name": "FUNCTIONS_WORKER_RUNTIME",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "FUNCTIONS_EXTENSION_VERSION",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "AzureWebJobsStorage",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "WEBSITE_CONTENTSHARE",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "KEY_VAULT_NAME",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "BATCH_ACCOUNT_URL",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "IMAGE_RESOURCE_ID",
+    "slotSetting": false,
+    "value": null
+  }
+]
+

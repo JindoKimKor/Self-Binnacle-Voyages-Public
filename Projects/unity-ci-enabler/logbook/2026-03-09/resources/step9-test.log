@@ -1,0 +1,35 @@
+=== Command ===
+curl -v -X POST --max-time 120 https://unity-ci-func.azurewebsites.net/api/github-webhook
+
+=== Output ===
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0   0     0   0     0     0     0  --:--:-- --:--:-- --:--:--     0* Host unity-ci-func.azurewebsites.net:443 was resolved.
+* IPv6: (none)
+* IPv4: 20.48.202.160
+*   Trying 20.48.202.160:443...
+* schannel: disabled automatic use of client certificate
+* ALPN: curl offers http/1.1
+* ALPN: server accepted http/1.1
+* Established connection to unity-ci-func.azurewebsites.net (20.48.202.160 port 443) from 10.144.17.46 port 52117 
+* using HTTP/1.x
+> POST /api/github-webhook HTTP/1.1
+> Host: unity-ci-func.azurewebsites.net
+> User-Agent: curl/8.17.0
+> Accept: */*
+> 
+* Request completely sent off
+* schannel: remote party requests renegotiation
+* schannel: renegotiating SSL/TLS connection
+* schannel: SSL/TLS connection renegotiated
+  0     0   0     0   0     0     0     0  --:--:--  0:00:01 --:--:--     0  0     0   0     0   0     0     0     0  --:--:--  0:00:02 --:--:--     0  0     0   0     0   0     0     0     0  --:--:--  0:00:03 --:--:--     0  0     0   0     0   0     0     0     0  --:--:--  0:00:04 --:--:--     0  0     0   0     0   0     0     0     0  --:--:--  0:00:05 --:--:--     0< HTTP/1.1 401 Unauthorized
+< Content-Length: 30
+< Content-Type: application/json
+< Date: Tue, 10 Mar 2026 00:36:23 GMT
+< Server: Kestrel
+< 
+{ [30 bytes data]
+100    30 100    30   0     0     5     0   0:00:06  0:00:05  0:00:01     6100    30 100    30   0     0     5     0   0:00:06  0:00:05  0:00:01     8{"error":"invalid signature"}
+
+* Connection #0 to host unity-ci-func.azurewebsites.net:443 left intact
+

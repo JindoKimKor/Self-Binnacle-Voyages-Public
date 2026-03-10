@@ -1,0 +1,5 @@
+=== Command ===
+curl -s -o /dev/null -w %{http_code} -X POST https://unity-ci-func.azurewebsites.net/api/github-webhook
+
+=== Output ===
+401

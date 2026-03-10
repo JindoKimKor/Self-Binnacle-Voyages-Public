@@ -1,0 +1,75 @@
+=== Command ===
+bash -c cd resources/repos/unity-ci-bootstrap/terraform/persistent && terraform apply -auto-approve
+
+=== Output ===
+[0m[1mdata.azurerm_client_config.current: Reading...[0m[0m
+[0m[1mazurerm_resource_group.main: Refreshing state... [id=/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg][0m
+[0m[1mdata.azurerm_client_config.current: Read complete after 0s [id=Y2xpZW50Q29uZmlncy9jbGllbnRJZD0wNGIwNzc5NS04ZGRiLTQ2MWEtYmJlZS0wMmY5ZTFiZjdiNDY7b2JqZWN0SWQ9MTRkZDlhNDUtMmQ1ZS00NjcwLTg4YjMtZTI1MWNkNzczNTE0O3N1YnNjcmlwdGlvbklkPTJmYWYwZTdiLTYxNmUtNDRkNi1hZWE5LTdiNTRmMDY2NGQ4NDt0ZW5hbnRJZD00ZGRkMzkzYS1lOThhLTQ0MDQtODQxZi1jNGJlY2RkOTI1YTU=][0m
+[0m[1mazurerm_shared_image_gallery.main: Refreshing state... [id=/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.Compute/galleries/unity_ci_gallery][0m
+[0m[1mazurerm_service_plan.function: Refreshing state... [id=/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.Web/serverFarms/unity-ci-func-plan][0m
+[0m[1mazurerm_key_vault.main: Refreshing state... [id=/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.KeyVault/vaults/unity-ci-kv][0m
+[0m[1mazurerm_storage_account.function: Refreshing state... [id=/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.Storage/storageAccounts/unitycifuncstorage][0m
+[0m[1mazurerm_batch_account.main: Refreshing state... [id=/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.Batch/batchAccounts/unitycibatch][0m
+[0m[1mazurerm_shared_image.main: Refreshing state... [id=/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.Compute/galleries/unity_ci_gallery/images/unity-ci-build-image][0m
+[0m[1mazurerm_linux_function_app.main: Refreshing state... [id=/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.Web/sites/unity-ci-func][0m
+[0m[1mazurerm_key_vault_access_policy.function_app: Refreshing state... [id=/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.KeyVault/vaults/unity-ci-kv/objectId/7f0b0966-e9b6-40e9-8540-cbb94ad20578][0m
+[0m[1mazurerm_role_assignment.function_batch_contributor: Refreshing state... [id=/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.Batch/batchAccounts/unitycibatch/providers/Microsoft.Authorization/roleAssignments/387495b2-3d65-449a-bfd0-00bb623f22ff][0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [32m+[0m create[0m
+  [33m~[0m update in-place[0m
+
+Terraform will perform the following actions:
+
+[1m  # azurerm_linux_function_app.main[0m will be updated in-place
+[0m  [33m~[0m[0m resource "azurerm_linux_function_app" "main" {
+      [33m~[0m[0m app_settings                                   = {
+          [31m-[0m[0m "VM_SIZE"                  = "Standard_D8ads_v5" [90m-> null[0m[0m
+          [31m-[0m[0m "WEBSITE_RUN_FROM_PACKAGE" = "https://unitycifuncstorage.blob.core.windows.net/function-releases/20260309220518-86ae7aad-5222-4878-944b-9257565a3224.zip?st=2026-03-10T01%3A55%3A18Z&se=2036-02-26T02%3A05%3A18Z&sp=r&sv=2026-02-06&sr=b&sig=[REDACTED]" [90m-> null[0m[0m
+            [90m# (3 unchanged elements hidden)[0m[0m
+        }
+        id                                             = "/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.Web/sites/unity-ci-func"
+        name                                           = "unity-ci-func"
+        tags                                           = {}
+        [90m# (31 unchanged attributes hidden)[0m[0m
+
+        [90m# (2 unchanged blocks hidden)[0m[0m
+    }
+
+[1m  # azurerm_role_assignment.function_gallery_reader[0m will be created
+[0m  [32m+[0m[0m resource "azurerm_role_assignment" "function_gallery_reader" {
+      [32m+[0m[0m id                               = (known after apply)
+      [32m+[0m[0m name                             = (known after apply)
+      [32m+[0m[0m principal_id                     = "7f0b0966-e9b6-40e9-8540-cbb94ad20578"
+      [32m+[0m[0m principal_type                   = (known after apply)
+      [32m+[0m[0m role_definition_id               = (known after apply)
+      [32m+[0m[0m role_definition_name             = "Reader"
+      [32m+[0m[0m scope                            = "/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.Compute/galleries/unity_ci_gallery"
+      [32m+[0m[0m skip_service_principal_aad_check = (known after apply)
+    }
+
+[1mPlan:[0m [0m1 to add, 1 to change, 0 to destroy.
+[0m[1mazurerm_linux_function_app.main: Modifying... [id=/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.Web/sites/unity-ci-func][0m[0m
+[0m[1mazurerm_linux_function_app.main: Still modifying... [id=/subscriptions/2faf0e7b-616e-44d6-aea9-...ders/Microsoft.Web/sites/unity-ci-func, 00m10s elapsed][0m[0m
+[0m[1mazurerm_linux_function_app.main: Still modifying... [id=/subscriptions/2faf0e7b-616e-44d6-aea9-...ders/Microsoft.Web/sites/unity-ci-func, 00m20s elapsed][0m[0m
+[0m[1mazurerm_linux_function_app.main: Still modifying... [id=/subscriptions/2faf0e7b-616e-44d6-aea9-...ders/Microsoft.Web/sites/unity-ci-func, 00m30s elapsed][0m[0m
+[0m[1mazurerm_linux_function_app.main: Modifications complete after 38s [id=/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.Web/sites/unity-ci-func][0m
+[0m[1mazurerm_role_assignment.function_gallery_reader: Creating...[0m[0m
+[0m[1mazurerm_role_assignment.function_gallery_reader: Still creating... [00m10s elapsed][0m[0m
+[0m[1mazurerm_role_assignment.function_gallery_reader: Still creating... [00m20s elapsed][0m[0m
+[0m[1mazurerm_role_assignment.function_gallery_reader: Creation complete after 22s [id=/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.Compute/galleries/unity_ci_gallery/providers/Microsoft.Authorization/roleAssignments/d43e5e91-4312-89a0-54f5-baa56729ee65][0m
+[0m[1m[32m
+Apply complete! Resources: 1 added, 1 changed, 0 destroyed.[0m
+[0m[1m[32m
+Outputs:
+
+[0mbatch_account_name = "unitycibatch"
+function_app_name = "unity-ci-func"
+function_app_url = "https://unity-ci-func.azurewebsites.net"
+image_definition_name = "unity-ci-build-image"
+image_gallery_name = "unity_ci_gallery"
+key_vault_id = "/subscriptions/2faf0e7b-616e-44d6-aea9-7b54f0664d84/resourceGroups/unity-ci-enabler-rg/providers/Microsoft.KeyVault/vaults/unity-ci-kv"
+key_vault_name = "unity-ci-kv"
+resource_group_name = "unity-ci-enabler-rg"
+

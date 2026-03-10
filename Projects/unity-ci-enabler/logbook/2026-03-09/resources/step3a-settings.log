@@ -1,0 +1,48 @@
+=== Command ===
+az functionapp config appsettings set --name unity-ci-func --resource-group unity-ci-enabler-rg --settings KEY_VAULT_NAME=unity-ci-kv BATCH_ACCOUNT_URL=https://unitycibatch.canadacentral.batch.azure.com
+
+=== Output ===
+WARNING: Could not detect runtime. To configure linuxFxVersion, please visit https://aka.ms/linuxFxVersion
+[
+  {
+    "name": "FUNCTIONS_WORKER_RUNTIME",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "FUNCTIONS_EXTENSION_VERSION",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "AzureWebJobsStorage",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "WEBSITE_CONTENTSHARE",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "KEY_VAULT_NAME",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "BATCH_ACCOUNT_URL",
+    "slotSetting": false,
+    "value": null
+  }
+]
+

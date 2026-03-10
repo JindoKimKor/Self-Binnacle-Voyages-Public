@@ -191,6 +191,24 @@ terraform destroy
 terraform show
 ```
 
+### init vs plan vs apply
+
+```
+init   →  plan    →  apply
+설치      미리보기    실행
+```
+
+| 명령어 | 하는 일 | 실제 변경? | 언제 실행? |
+|--------|---------|-----------|-----------|
+| `init` | provider 플러그인 다운로드 + 백엔드 초기화 | X | 처음 한 번, provider 추가/변경 시 |
+| `plan` | 현재 상태 vs 코드 비교 → 만들/바꿀/지울 리소스 미리보기 (dry run) | X | apply 전에 확인용 |
+| `apply` | plan 결과를 실제로 실행 → Azure에 리소스 생성/변경/삭제 | **O** | 실제 배포 시 |
+
+`plan` 출력 기호:
+- `+` = 새로 만들기
+- `~` = 변경
+- `-` = 삭제
+
 ---
 
 ## 로컬 개발 vs 실제 운영 인증 비교
@@ -200,6 +218,40 @@ terraform show
 | 로컬에서 `terraform apply` / Terratest | `az login` (Azure CLI) |
 | Azure VM이 Key Vault 접근 | Managed Identity (자동, credentials 불필요) |
 | GitHub Actions에서 `terraform apply` | Service Principal (환경변수 주입) |
+
+---
+
+## Terraform이 클라우드 개발을 쉽게 만드는 이유
+
+실제 개발 중 경험한 사례:
+
+### 1. 권한 누락 → 코드 한 줄로 해결
+
+Function App이 Batch API를 호출했더니 403 PermissionDenied 발생. 원인: Managed Identity에 Batch Account 권한이 없었음.
+
+```hcl
+# main.tf에 추가
+resource "azurerm_role_assignment" "function_batch_contributor" {
+  scope                = azurerm_batch_account.main.id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_linux_function_app.main.identity[0].principal_id
+}
+```
+
+`terraform apply` 한 번이면 끝. Azure Portal에서 RBAC 메뉴 찾아 돌아다닐 필요 없음.
+
+### 2. 환경 재현이 완벽함
+
+리소스를 전부 삭제하고 `terraform apply`하면 동일한 환경이 재현됨. 수동 설정이면 "그때 그 권한 뭐였더라..." 하고 찾아다녀야 함.
+
+### 3. 인프라 변경이 코드로 추적됨
+
+git diff로 "이번에 뭐가 바뀌었는지" 정확히 보임:
+- Key Vault access policy 추가
+- Batch Account role assignment 추가
+- Function App app_settings 변경
+
+수동으로 했으면 Azure Activity Log를 뒤져야 함.
 
 ---
 

@@ -1,0 +1,11 @@
+=== Command ===
+bash resources/repos/unity-ci-function/scripts/deploy.sh
+
+=== Output ===
+=== Building Go binary (linux/amd64) ===
+=== Creating deployment package ===
+=== Deploying to unity-ci-func ===
+WARNING: Could not detect runtime. To configure linuxFxVersion, please visit https://aka.ms/linuxFxVersion
+=== Cleanup ===
+=== Done ===
+
